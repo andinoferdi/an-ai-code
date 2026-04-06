@@ -56,7 +56,7 @@ Requirements:
 Commands:
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/andinoferdi/an-ai-code
 cd ai-code
 npm install
 npm run build

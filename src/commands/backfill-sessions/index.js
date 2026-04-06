@@ -1,1 +1,7 @@
-export default { isEnabled: () => false, isHidden: true, name: 'stub' };
+const backfillSessionsStub = {
+  isEnabled: () => false,
+  isHidden: true,
+  name: 'stub',
+}
+
+export default backfillSessionsStub
