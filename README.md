@@ -1,36 +1,39 @@
-# Claude Code Source Leak (via npm Sourcemap)
+# Claude Code Source Leak via npm Sourcemap
 
-Repository ini berisi mirror/arsip source code Claude Code yang sempat terekspos melalui file sourcemap di paket npm.
+This repository archives and documents a source leak of Claude Code that was exposed through a sourcemap file published to npm.
 
-## Ringkasan
-Pada 31 Maret 2026, ditemukan bahwa paket Claude Code di npm menyertakan sourcemap yang memuat `sourcesContent`. Karena itu, source asli dapat direkonstruksi dari file `.map`.
+## What happened
+On March 31, 2026, Chaofan Shou (@Fried_rice) reported that the published Claude Code package included a sourcemap containing original source files in `sourcesContent`.
 
-Temuan awal dipublikasikan oleh Chaofan Shou (@Fried_rice):
-- https://x.com/Fried_rice/status/2038894956459290963
+- Original post: https://x.com/Fried_rice/status/2038894956459290963
 
-## Bagaimana leak terjadi
-Sourcemap JavaScript/TypeScript biasanya menyimpan mapping dari kode hasil build ke source asli.
-Jika sourcemap dipublish ke npm tanpa filter yang tepat, source code bisa ikut terbuka melalui field `sourcesContent`.
+[![Tweet about the leak](assets/x-post.png)](https://x.com/Fried_rice/status/2038894956459290963)
 
-Contoh struktur sourcemap:
+## Why this is possible
+A sourcemap can include full source text. If `.map` files are shipped to npm without proper exclusion, original code can be reconstructed.
+
+Example:
 
 ```json
 {
   "version": 3,
   "sources": ["../src/main.tsx", "../src/tools/BashTool.ts"],
-  "sourcesContent": ["/* source asli */", "/* source asli */"],
+  "sourcesContent": ["/* original source */", "/* original source */"],
   "mappings": "..."
 }
 ```
 
-## Isi repositori ini
-Tujuan repo ini adalah dokumentasi dan analisis teknis atas codebase yang terekspos. Beberapa area yang menarik untuk dipelajari:
-- Arsitektur CLI berbasis React/Ink
-- Sistem tools dan orkestrasi agent
-- Integrasi bridge/remote control
-- Komponen internal lain yang sebelumnya tidak dipublikasikan
+[![npm package showing exposed sources](assets/claude-npm-img.png)](assets/claude-npm-img.png)
 
-Struktur utama:
+## What is in this repo
+This mirror is intended for technical analysis and documentation of the exposed codebase, including:
+
+- CLI architecture
+- Tooling and agent orchestration
+- Bridge/remote-control internals
+- Other internal modules that were not meant to be public
+
+Main structure:
 
 ```text
 src/
@@ -44,12 +47,13 @@ src/
   buddy/
 ```
 
-## Cara eksplorasi lokal
-Persyaratan:
-- Bun atau Node.js (disarankan versi terbaru)
+## Run locally
+Requirements:
+
+- Bun or Node.js
 - npm
 
-Langkah:
+Commands:
 
 ```bash
 git clone <repo-url>
@@ -59,12 +63,12 @@ npm run build
 node dist/main.js
 ```
 
-## Catatan penting
-- Repositori ini bukan produk resmi Anthropic.
-- Saya bukan pihak yang membocorkan file.
-- Kepemilikan source code tetap milik Anthropic PBC.
-- Gunakan hanya untuk tujuan riset, edukasi, dan dokumentasi teknis.
+## Disclaimer
+- This is not an official Anthropic repository.
+- I did not create the leak.
+- Original code ownership remains with Anthropic PBC.
+- Shared for research, educational, and archival purposes.
 
-## Kredit
-- Penemu awal: Chaofan Shou (@Fried_rice)
-- Post sumber: https://x.com/Fried_rice/status/2038894956459290963
+## Credits
+- Discovery: Chaofan Shou (@Fried_rice)
+- Source post: https://x.com/Fried_rice/status/2038894956459290963
