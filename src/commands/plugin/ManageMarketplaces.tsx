@@ -6,7 +6,6 @@ import { type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS, logEve
 import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutHint.js';
 import { Byline } from '../../components/design-system/Byline.js';
 import { KeyboardShortcutHint } from '../../components/design-system/KeyboardShortcutHint.js';
-// eslint-disable-next-line custom-rules/prefer-use-keybindings -- useInput needed for marketplace-specific u/r shortcuts and y/n confirmation not in keybinding schema
 import { Box, Text, useInput } from '../../ink.js';
 import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { LoadedPlugin } from '../../types/plugin.js';
@@ -67,6 +66,7 @@ export function ManageMarketplaces({
   const [selectedMarketplace, setSelectedMarketplace] = useState<MarketplaceState | null>(null);
   const [detailsMenuIndex, setDetailsMenuIndex] = useState(0);
   const hasAttemptedAutoAction = useRef(false);
+  const applyChangesRef = useRef<(states?: MarketplaceState[]) => Promise<void>>(async () => {});
 
   // Load marketplaces and their installed plugins
   useEffect(() => {
@@ -140,7 +140,9 @@ export function ManageMarketplaces({
               }
               setMarketplaceStates(newStates);
               // Apply the change immediately
-              setTimeout(applyChanges, 100, newStates);
+              setTimeout(() => {
+                void applyChangesRef.current(newStates);
+              }, 100);
             } else if (targetState) {
               // No action - just show the details view for this marketplace
               setSelectedIndex(targetIndex + 1); // +1 because "Add Marketplace" is at index 0
@@ -161,9 +163,8 @@ export function ManageMarketplaces({
       }
     }
     void loadMarketplaces();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
-  }, [targetMarketplace, action, error]);
+  }, [targetMarketplace, action, error, setError]);
 
   // Check if there are any pending changes
   const hasPendingChanges = () => {
@@ -181,7 +182,7 @@ export function ManageMarketplaces({
   };
 
   // Apply all pending changes
-  const applyChanges = async (states?: MarketplaceState[]) => {
+  async function applyChanges(states?: MarketplaceState[]) {
     const statesToProcess = states || marketplaceStates;
     const wasInDetailsView = internalView === 'details';
     setIsProcessing(true);
@@ -338,7 +339,8 @@ export function ManageMarketplaces({
       setIsProcessing(false);
       setProgressMessage(null);
     }
-  };
+  }
+  applyChangesRef.current = applyChanges;
 
   // Handle confirming marketplace removal
   const confirmRemove = async () => {
@@ -763,7 +765,7 @@ type ManageMarketplacesKeyHintsProps = {
   exitState: Props['exitState'];
   hasPendingActions: boolean;
 };
-function ManageMarketplacesKeyHints(t0) {
+function ManageMarketplacesKeyHints(t0: ManageMarketplacesKeyHintsProps) {
   const $ = _c(18);
   const {
     exitState,

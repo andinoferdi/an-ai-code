@@ -5,7 +5,6 @@
  * servers reuse it. Lives in settings.xaaIdp (non-secret) + a keychain slot
  * keyed by issuer (secret). Separate trust domain from per-server AS secrets.
  */
-import type { Command } from '@commander-js/extra-typings'
 import { cliError, cliOk } from '../../cli/exit.js'
 import {
   acquireIdpIdToken,
@@ -21,7 +20,30 @@ import {
 import { errorMessage } from '../../utils/errors.js'
 import { updateSettingsForSource } from '../../utils/settings/settings.js'
 
-export function registerMcpXaaIdpCommand(mcp: Command): void {
+type XaaSetupOptions = {
+  issuer: string
+  clientId: string
+  clientSecret?: boolean
+  callbackPort?: string
+}
+
+type XaaLoginOptions = {
+  force?: boolean
+  idToken?: string
+}
+
+type McpCommand = {
+  command: (name: string) => McpCommand
+  description: (text: string) => McpCommand
+  requiredOption: (flags: string, description: string) => McpCommand
+  option: (flags: string, description: string) => McpCommand
+  action: {
+    (handler: (options: XaaSetupOptions) => unknown): McpCommand
+    (handler: (options: XaaLoginOptions) => unknown): McpCommand
+  }
+}
+
+export function registerMcpXaaIdpCommand(mcp: McpCommand): void {
   const xaaIdp = mcp
     .command('xaa')
     .description('Manage the XAA (SEP-990) IdP connection')
@@ -41,7 +63,7 @@ export function registerMcpXaaIdpCommand(mcp: Command): void {
       '--callback-port <port>',
       'Fixed loopback callback port (only if IdP does not honor RFC 8252 port-any matching)',
     )
-    .action(options => {
+    .action((options: XaaSetupOptions) => {
       // Validate everything BEFORE any writes. An exit(1) mid-write leaves
       // settings configured but keychain missing — confusing state.
       // updateSettingsForSource doesn't schema-check on write; a non-URL
@@ -166,7 +188,7 @@ export function registerMcpXaaIdpCommand(mcp: Command): void {
       '--id-token <jwt>',
       'Write this pre-obtained id_token directly to cache, skipping the OIDC browser login',
     )
-    .action(async options => {
+    .action(async (options: XaaLoginOptions) => {
       const idp = getXaaIdpSettings()
       if (!idp) {
         return cliError(

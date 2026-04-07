@@ -98,7 +98,9 @@ export function PluginOptionsFlow({
   // Latest-ref: lets the effect close over the current onDone without
   // re-running when the parent re-renders.
   const onDoneRef = React.useRef(onDone);
-  onDoneRef.current = onDone;
+  React.useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
 
   // Nothing to configure → tell the caller and render nothing. Effect,
   // not inline call: calling setState in the parent during our render

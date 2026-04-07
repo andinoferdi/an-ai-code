@@ -7,7 +7,6 @@ import { Byline } from '../../components/design-system/Byline.js';
 import { SearchBox } from '../../components/SearchBox.js';
 import { useSearchInput } from '../../hooks/useSearchInput.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
-// eslint-disable-next-line custom-rules/prefer-use-keybindings -- useInput needed for raw search mode text input
 import { Box, Text, useInput, useTerminalFocus } from '../../ink.js';
 import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.js';
 import type { LoadedPlugin } from '../../types/plugin.js';
@@ -48,7 +47,6 @@ type ViewState = 'plugin-list' | 'plugin-details' | {
 export function DiscoverPlugins({
   error,
   setError,
-  result: _result,
   setResult,
   setViewState: setParentViewState,
   onInstallComplete,
@@ -648,7 +646,10 @@ export function DiscoverPlugins({
       <DiscoverPluginsKeyHint hasSelection={selectedForInstall.size > 0} canToggle={selectedIndex < filteredPlugins.length && !filteredPlugins[selectedIndex]?.isInstalled} />
     </Box>;
 }
-function DiscoverPluginsKeyHint(t0) {
+function DiscoverPluginsKeyHint(t0: {
+  hasSelection: boolean;
+  canToggle: boolean;
+}) {
   const $ = _c(10);
   const {
     hasSelection,
@@ -703,7 +704,9 @@ function DiscoverPluginsKeyHint(t0) {
 /**
  * Context-aware empty state message for the Discover screen
  */
-function EmptyStateMessage(t0) {
+function EmptyStateMessage(t0: {
+  reason: EmptyMarketplaceReason | null;
+}) {
   const $ = _c(6);
   const {
     reason

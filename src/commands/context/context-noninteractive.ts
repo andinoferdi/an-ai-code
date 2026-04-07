@@ -13,6 +13,48 @@ import { getMessagesAfterCompactBoundary } from '../../utils/messages.js'
 import { getSourceDisplayName } from '../../utils/settings/constants.js'
 import { plural } from '../../utils/stringUtils.js'
 
+type ContextCollapseOperationsModule = {
+  projectView: (messages: Message[]) => Message[]
+}
+
+type ContextCollapseStats = {
+  collapsedSpans: number
+  collapsedMessages: number
+  stagedSpans: number
+  health: {
+    totalSpawns: number
+    totalErrors: number
+    lastError?: string
+    emptySpawnWarningEmitted: boolean
+    totalEmptySpawns: number
+  }
+}
+
+type ContextCollapseIndexModule = {
+  getStats: () => ContextCollapseStats
+  isContextCollapseEnabled: () => boolean
+}
+
+function loadContextCollapseOperations(): ContextCollapseOperationsModule | null {
+  try {
+    /* eslint-disable @typescript-eslint/no-require-imports */
+    return require('../../services/contextCollapse/operations.js') as ContextCollapseOperationsModule
+    /* eslint-enable @typescript-eslint/no-require-imports */
+  } catch {
+    return null
+  }
+}
+
+function loadContextCollapseIndex(): ContextCollapseIndexModule | null {
+  try {
+    /* eslint-disable @typescript-eslint/no-require-imports */
+    return require('../../services/contextCollapse/index.js') as ContextCollapseIndexModule
+    /* eslint-enable @typescript-eslint/no-require-imports */
+  } catch {
+    return null
+  }
+}
+
 /**
  * Shared data-collection path for `/context` (slash command) and the SDK
  * `get_context_usage` control request. Mirrors query.ts's pre-API transforms
@@ -48,11 +90,10 @@ export async function collectContextData(
 
   let apiView = getMessagesAfterCompactBoundary(messages)
   if (feature('CONTEXT_COLLAPSE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
-    const { projectView } =
-      require('../../services/contextCollapse/operations.js') as typeof import('../../services/contextCollapse/operations.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
-    apiView = projectView(apiView)
+    const contextCollapse = loadContextCollapseOperations()
+    if (contextCollapse) {
+      apiView = contextCollapse.projectView(apiView)
+    }
   }
 
   const { messages: compactedMessages } = await microcompactMessages(apiView)
@@ -111,12 +152,9 @@ function formatContextAsMarkdownTable(data: ContextData): string {
   // the user needs to know which strategy is managing their context
   // even before anything has fired.
   if (feature('CONTEXT_COLLAPSE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
-    const { getStats, isContextCollapseEnabled } =
-      require('../../services/contextCollapse/index.js') as typeof import('../../services/contextCollapse/index.js')
-    /* eslint-enable @typescript-eslint/no-require-imports */
-    if (isContextCollapseEnabled()) {
-      const s = getStats()
+    const contextCollapse = loadContextCollapseIndex()
+    if (contextCollapse?.isContextCollapseEnabled()) {
+      const s = contextCollapse.getStats()
       const { health: h } = s
 
       const parts = []

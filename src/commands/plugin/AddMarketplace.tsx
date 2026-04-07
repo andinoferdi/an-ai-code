@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS, logEvent } from 'src/services/analytics/index.js';
 import { ConfigurableShortcutHint } from '../../components/ConfigurableShortcutHint.js';
 import { Byline } from '../../components/design-system/Byline.js';
@@ -42,7 +42,7 @@ export function AddMarketplace({
   const hasAttemptedAutoAdd = useRef(false);
   const [isLoading, setLoading] = useState(false);
   const [progressMessage, setProgressMessage] = useState<string>('');
-  const handleAdd = async () => {
+  const handleAdd = useCallback(async () => {
     const input = inputValue.trim();
     if (!input) {
       setError('Please enter a marketplace source');
@@ -108,17 +108,18 @@ export function AddMarketplace({
         setResult(null);
       }
     }
-  };
+  }, [inputValue, setError, setLoading, setProgressMessage, setResult, setViewState, onAddComplete, cliMode]);
 
   // Auto-add if inputValue is provided
   useEffect(() => {
     if (inputValue && !hasAttemptedAutoAdd.current && !error && !result) {
       hasAttemptedAutoAdd.current = true;
-      void handleAdd();
+      setTimeout(() => {
+        void handleAdd();
+      }, 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     // biome-ignore lint/correctness/useExhaustiveDependencies: intentional
-  }, []); // Only run once on mount
+  }, [error, handleAdd, inputValue, result]); // Only run once on mount (guarded by hasAttemptedAutoAdd)
 
   return <Box flexDirection="column">
       <Box flexDirection="column" paddingX={1} borderStyle="round">

@@ -7,6 +7,18 @@ import type { Message } from '../../types/message.js';
 import { getCwd } from '../../utils/cwd.js';
 import { renderMessagesToPlainText } from '../../utils/exportRenderer.js';
 import { writeFileSync_DEPRECATED } from '../../utils/slowOperations.js';
+
+function isTextContentItem(item: unknown): item is { type: 'text'; text: string } {
+  if (typeof item !== 'object' || item === null) {
+    return false;
+  }
+  if (!('type' in item) || !('text' in item)) {
+    return false;
+  }
+  const candidate = item as { type?: unknown; text?: unknown };
+  return candidate.type === 'text' && typeof candidate.text === 'string';
+}
+
 function formatTimestamp(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -26,8 +38,8 @@ export function extractFirstPrompt(messages: Message[]): string {
   if (typeof content === 'string') {
     result = content.trim();
   } else if (Array.isArray(content)) {
-    const textContent = content.find(item => item.type === 'text');
-    if (textContent && 'text' in textContent) {
+    const textContent = content.find(isTextContentItem);
+    if (textContent) {
       result = textContent.text.trim();
     }
   }

@@ -21,6 +21,7 @@ import {
   type LocalAgentTaskState,
 } from '../../tasks/LocalAgentTask/LocalAgentTask.js'
 import { isLocalShellTask } from '../../tasks/LocalShellTask/guards.js'
+import type { TaskState } from '../../tasks/types.js'
 import { asAgentId } from '../../types/ids.js'
 import type { Message } from '../../types/message.js'
 import { createEmptyAttributionState } from '../../utils/commitAttribution.js'
@@ -63,6 +64,16 @@ export async function clearConversation({
   setAppState?: (f: (prev: AppState) => AppState) => void
   setConversationId?: (id: UUID) => void
 }): Promise<void> {
+  const hasAbortController = (
+    task: TaskState,
+  ): task is TaskState & { abortController?: AbortController | null } =>
+    'abortController' in task
+
+  const hasUnregisterCleanup = (
+    task: TaskState,
+  ): task is TaskState & { unregisterCleanup?: () => void } =>
+    'unregisterCleanup' in task
+
   // Execute SessionEnd hooks before clearing (bounded by
   // CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS, default 1.5s)
   const sessionEndTimeoutMs = getSessionEndHookTimeoutMs()
@@ -137,7 +148,10 @@ export async function clearConversation({
       // Partition tasks using the same predicate computed above:
       // kill+remove foreground tasks, preserve everything else.
       const nextTasks: AppState['tasks'] = {}
-      for (const [taskId, task] of Object.entries(prev.tasks)) {
+      for (const [taskId, rawTask] of Object.entries(
+        prev.tasks as Record<string, unknown>,
+      )) {
+        const task = rawTask as TaskState
         if (!shouldKillTask(task)) {
           nextTasks[taskId] = task
           continue
@@ -152,10 +166,10 @@ export async function clearConversation({
                 clearTimeout(task.cleanupTimeoutId)
               }
             }
-            if ('abortController' in task) {
+            if (hasAbortController(task)) {
               task.abortController?.abort()
             }
-            if ('unregisterCleanup' in task) {
+            if (hasUnregisterCleanup(task)) {
               task.unregisterCleanup?.()
             }
           }

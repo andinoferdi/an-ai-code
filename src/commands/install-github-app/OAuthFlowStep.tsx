@@ -155,7 +155,10 @@ export function OAuthFlowStep({
   }, [oauthService, onSuccess]);
   useEffect(() => {
     if (oauthStatus.state === 'starting') {
-      void startOAuth();
+      const timer = setTimeout(() => {
+        void startOAuth();
+      }, 0);
+      timersRef.current.add(timer);
     }
   }, [oauthStatus.state, startOAuth]);
 
@@ -170,17 +173,28 @@ export function OAuthFlowStep({
       timersRef.current.add(timer_1);
     }
   }, [oauthStatus]);
-  useEffect(() => {
-    if (pastedCode === 'c' && oauthStatus.state === 'waiting_for_login' && showPastePrompt && !urlCopied) {
-      void setClipboard(oauthStatus.url).then(raw => {
-        if (raw) process.stdout.write(raw);
-        setUrlCopied(true);
-        clearTimeout(urlCopiedTimerRef.current);
-        urlCopiedTimerRef.current = setTimeout(setUrlCopied, 2000, false);
-      });
-      setPastedCode('');
-    }
-  }, [pastedCode, oauthStatus, showPastePrompt, urlCopied]);
+  const handlePastedCodeChange = useCallback(
+    (value: string) => {
+      if (
+        value === 'c' &&
+        oauthStatus.state === 'waiting_for_login' &&
+        showPastePrompt &&
+        !urlCopied
+      ) {
+        void setClipboard(oauthStatus.url).then(raw => {
+          if (raw) process.stdout.write(raw);
+          setUrlCopied(true);
+          clearTimeout(urlCopiedTimerRef.current);
+          urlCopiedTimerRef.current = setTimeout(setUrlCopied, 2000, false);
+        });
+        setPastedCode('');
+        return;
+      }
+
+      setPastedCode(value);
+    },
+    [oauthStatus, showPastePrompt, urlCopied],
+  );
 
   // Cleanup OAuth service and timers when component unmounts
   useEffect(() => {
@@ -213,7 +227,7 @@ export function OAuthFlowStep({
 
             {showPastePrompt && <Box>
                 <Text>{PASTE_HERE_MSG}</Text>
-                <TextInput value={pastedCode} onChange={setPastedCode} onSubmit={(value_0: string) => handleSubmitCode(value_0, oauthStatus.url)} cursorOffset={cursorOffset} onChangeCursorOffset={setCursorOffset} columns={textInputColumns} />
+                <TextInput value={pastedCode} onChange={handlePastedCodeChange} onSubmit={(value_0: string) => handleSubmitCode(value_0, oauthStatus.url)} cursorOffset={cursorOffset} onChangeCursorOffset={setCursorOffset} columns={textInputColumns} />
               </Box>}
           </Box>;
       case 'processing':

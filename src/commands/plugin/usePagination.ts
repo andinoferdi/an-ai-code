@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useMemo } from 'react'
 
 const DEFAULT_MAX_VISIBLE = 5
 
@@ -52,35 +52,11 @@ export function usePagination<T>({
 }: UsePaginationOptions): UsePaginationResult<T> {
   const needsPagination = totalItems > maxVisible
 
-  // Use a ref to track the previous scroll offset for smooth scrolling
-  const scrollOffsetRef = useRef(0)
-
-  // Compute the scroll offset based on selectedIndex
-  // This ensures the selected item is always visible
   const scrollOffset = useMemo(() => {
     if (!needsPagination) return 0
-
-    const prevOffset = scrollOffsetRef.current
-
-    // If selected item is above the visible window, scroll up
-    if (selectedIndex < prevOffset) {
-      scrollOffsetRef.current = selectedIndex
-      return selectedIndex
-    }
-
-    // If selected item is below the visible window, scroll down
-    if (selectedIndex >= prevOffset + maxVisible) {
-      const newOffset = selectedIndex - maxVisible + 1
-      scrollOffsetRef.current = newOffset
-      return newOffset
-    }
-
-    // Selected item is within visible window, keep current offset
-    // But ensure offset is still valid
     const maxOffset = Math.max(0, totalItems - maxVisible)
-    const clampedOffset = Math.min(prevOffset, maxOffset)
-    scrollOffsetRef.current = clampedOffset
-    return clampedOffset
+    const requiredOffset = Math.max(0, selectedIndex - maxVisible + 1)
+    return Math.min(requiredOffset, maxOffset)
   }, [selectedIndex, maxVisible, needsPagination, totalItems])
 
   const startIndex = scrollOffset
@@ -109,7 +85,8 @@ export function usePagination<T>({
   )
 
   // These are mostly no-ops for continuous scrolling but kept for API compatibility
-  const goToPage = useCallback((_page: number) => {
+  const goToPage = useCallback((page: number) => {
+    void page
     // No-op - scrolling is controlled by selectedIndex
   }, [])
 
@@ -137,14 +114,22 @@ export function usePagination<T>({
       _direction: 'left' | 'right',
       _setSelectedIndex: (index: number) => void,
     ): boolean => {
+      void _direction
+      void _setSelectedIndex
       return false
     },
     [],
   )
 
   // Calculate page-like values for backwards compatibility
-  const totalPages = Math.max(1, Math.ceil(totalItems / maxVisible))
-  const currentPage = Math.floor(scrollOffset / maxVisible)
+  const totalPages = useMemo(
+    () => Math.max(1, Math.ceil(totalItems / maxVisible)),
+    [totalItems, maxVisible],
+  )
+  const currentPage = useMemo(
+    () => Math.floor(scrollOffset / maxVisible),
+    [scrollOffset, maxVisible],
+  )
 
   return {
     currentPage,

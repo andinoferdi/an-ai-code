@@ -9,6 +9,20 @@ import { analyzeContextUsage } from '../../utils/analyzeContext.js';
 import { getMessagesAfterCompactBoundary } from '../../utils/messages.js';
 import { renderToAnsiString } from '../../utils/staticRender.js';
 
+type ContextCollapseOperationsModule = {
+  projectView: (messages: Message[]) => Message[];
+};
+
+function loadContextCollapseOperations(): ContextCollapseOperationsModule | null {
+  try {
+    /* eslint-disable @typescript-eslint/no-require-imports */
+    return require('../../services/contextCollapse/operations.js') as ContextCollapseOperationsModule;
+    /* eslint-enable @typescript-eslint/no-require-imports */
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Apply the same context transforms query.ts does before the API call, so
  * /context shows what the model actually sees rather than the REPL's raw
@@ -18,12 +32,10 @@ import { renderToAnsiString } from '../../utils/staticRender.js';
 function toApiView(messages: Message[]): Message[] {
   let view = getMessagesAfterCompactBoundary(messages);
   if (feature('CONTEXT_COLLAPSE')) {
-    /* eslint-disable @typescript-eslint/no-require-imports */
-    const {
-      projectView
-    } = require('../../services/contextCollapse/operations.js') as typeof import('../../services/contextCollapse/operations.js');
-    /* eslint-enable @typescript-eslint/no-require-imports */
-    view = projectView(view);
+    const contextCollapse = loadContextCollapseOperations();
+    if (contextCollapse) {
+      view = contextCollapse.projectView(view);
+    }
   }
   return view;
 }

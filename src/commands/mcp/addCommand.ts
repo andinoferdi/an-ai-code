@@ -3,7 +3,6 @@
  *
  * Extracted from main.tsx to enable direct testing.
  */
-import { type Command, Option } from '@commander-js/extra-typings'
 import { cliError, cliOk } from '../../cli/exit.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -27,10 +26,40 @@ import {
 import { parseEnvVars } from '../../utils/envUtils.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 
+type McpAddOptions = {
+  scope: string
+  transport?: string
+  env?: string[]
+  header?: string[]
+  clientId?: string
+  clientSecret?: boolean
+  callbackPort?: string
+  xaa?: boolean
+}
+
+type McpCommand = {
+  command: (name: string) => McpCommand
+  description: (text: string) => McpCommand
+  option: (
+    flags: string,
+    description: string,
+    defaultValue?: string,
+  ) => McpCommand
+  helpOption: (flags: string, description: string) => McpCommand
+  action: (
+    handler: (
+      name: string,
+      commandOrUrl: string,
+      args: string[],
+      options: McpAddOptions,
+    ) => void | Promise<void>,
+  ) => McpCommand
+}
+
 /**
  * Registers the `mcp add` subcommand on the given Commander command.
  */
-export function registerMcpAddCommand(mcp: Command): void {
+export function registerMcpAddCommand(mcp: McpCommand): void {
   mcp
     .command('add <name> <commandOrUrl> [args...]')
     .description(
@@ -72,13 +101,17 @@ export function registerMcpAddCommand(mcp: Command): void {
       'Fixed port for OAuth callback (for servers requiring pre-registered redirect URIs)',
     )
     .helpOption('-h, --help', 'Display help for command')
-    .addOption(
-      new Option(
-        '--xaa',
-        "Enable XAA (SEP-990) for this server. Requires 'claude mcp xaa setup' first. Also requires --client-id and --client-secret (for the MCP server's AS).",
-      ).hideHelp(!isXaaEnabled()),
+    .option(
+      '--xaa',
+      "Enable XAA (SEP-990) for this server. Requires 'claude mcp xaa setup' first. Also requires --client-id and --client-secret (for the MCP server's AS).",
     )
-    .action(async (name, commandOrUrl, args, options) => {
+    .action(
+      async (
+        name: string,
+        commandOrUrl: string,
+        args: string[],
+        options: McpAddOptions,
+      ) => {
       // Commander.js handles -- natively: it consumes -- and everything after becomes args
       const actualCommand = commandOrUrl
       const actualArgs = args
@@ -276,5 +309,6 @@ export function registerMcpAddCommand(mcp: Command): void {
       } catch (error) {
         cliError((error as Error).message)
       }
-    })
+      },
+    )
 }

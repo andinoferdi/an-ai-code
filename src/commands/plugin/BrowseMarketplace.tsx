@@ -49,7 +49,6 @@ type MarketplaceInfo = {
 export function BrowseMarketplace({
   error,
   setError,
-  result: _result,
   setResult,
   setViewState: setParentViewState,
   onInstallComplete,

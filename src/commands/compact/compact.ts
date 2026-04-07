@@ -31,9 +31,32 @@ import {
   type SystemPrompt,
 } from '../../utils/systemPrompt.js'
 
+type ReactiveCompactModule = {
+  isReactiveOnlyMode: () => boolean
+  reactiveCompactOnPromptTooLong: (
+    messages: Message[],
+    cacheSafeParams: Awaited<ReturnType<typeof getCacheSharingParams>>,
+    options: { customInstructions?: string; trigger: 'manual' },
+  ) => Promise<
+    | {
+        ok: true
+        result: CompactionResult
+      }
+    | {
+        ok: false
+        reason:
+          | 'too_few_groups'
+          | 'aborted'
+          | 'exhausted'
+          | 'error'
+          | 'media_unstrippable'
+      }
+  >
+}
+
 /* eslint-disable @typescript-eslint/no-require-imports */
 const reactiveCompact = feature('REACTIVE_COMPACT')
-  ? (require('../../services/compact/reactiveCompact.js') as typeof import('../../services/compact/reactiveCompact.js'))
+  ? (require('../../services/compact/reactiveCompact.js') as ReactiveCompactModule)
   : null
 /* eslint-enable @typescript-eslint/no-require-imports */
 
@@ -140,7 +163,7 @@ async function compactViaReactive(
   messages: Message[],
   context: ToolUseContext,
   customInstructions: string,
-  reactive: NonNullable<typeof reactiveCompact>,
+  reactive: ReactiveCompactModule,
 ): Promise<{
   type: 'compact'
   compactionResult: CompactionResult

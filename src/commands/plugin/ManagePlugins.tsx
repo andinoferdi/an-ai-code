@@ -14,7 +14,6 @@ import type { ClaudeAIServerInfo, HTTPServerInfo, SSEServerInfo, StdioServerInfo
 import { SearchBox } from '../../components/SearchBox.js';
 import { useSearchInput } from '../../hooks/useSearchInput.js';
 import { useTerminalSize } from '../../hooks/useTerminalSize.js';
-// eslint-disable-next-line custom-rules/prefer-use-keybindings -- useInput needed for raw search mode text input
 import { Box, Text, useInput, useTerminalFocus } from '../../ink.js';
 import { useKeybinding, useKeybindings } from '../../keybindings/useKeybinding.js';
 import { getBuiltinPluginDefinition } from '../../plugins/builtinPlugins.js';
@@ -497,7 +496,7 @@ export function ManagePlugins({
         type: 'menu'
       });
     }
-  }, [viewState, setParentViewState, pendingToggles, setResult]);
+  }, [viewState, setParentViewState, pendingToggles, setResult, onManageComplete]);
 
   // Escape when not in search mode - go back.
   // Excludes confirm-project-uninstall (has its own confirm:no handler in
@@ -559,7 +558,7 @@ export function ManagePlugins({
     for (const state of pluginStates) {
       const pluginId = `${state.plugin.name}@${state.marketplace}`;
       const isEnabled = mergedSettings?.enabledPlugins?.[pluginId] !== false;
-      const errors = pluginErrors.filter(e => 'plugin' in e && e.plugin === state.plugin.name || e.source === pluginId || e.source.startsWith(`${state.plugin.name}@`));
+      const errors = pluginErrors.filter((e: PluginError) => 'plugin' in e && e.plugin === state.plugin.name || e.source === pluginId || e.source.startsWith(`${state.plugin.name}@`));
 
       // Built-in plugins use 'builtin' scope; others look up from V2 data.
       const originalScope = state.plugin.isBuiltin ? 'builtin' : state.scope || 'user';
@@ -814,7 +813,7 @@ export function ManagePlugins({
 
   // Configuration state
   const [configNeeded, setConfigNeeded] = useState<McpbNeedsConfigResult | null>(null);
-  const [_isLoadingConfig, setIsLoadingConfig] = useState(false);
+  const [, setIsLoadingConfig] = useState(false);
   const [selectedPluginHasMcpb, setSelectedPluginHasMcpb] = useState(false);
 
   // Detect if selected plugin has MCPB
@@ -1205,7 +1204,7 @@ export function ManagePlugins({
     } else if (item_7?.type === 'mcp') {
       void toggleMcpServer(item_7.client.name);
     }
-  }, [selectedIndex, filteredItems, pendingToggles, pluginStates, toggleMcpServer]);
+  }, [selectedIndex, filteredItems, pendingToggles, toggleMcpServer]);
 
   // Handle accept (Enter) in plugin-list
   const handleAccept = React.useCallback(() => {
@@ -1306,7 +1305,7 @@ export function ManagePlugins({
     }> = [];
     menuItems.push({
       label: isEnabled_1 ? 'Disable plugin' : 'Enable plugin',
-      action: () => void handleSingleOperation(isEnabled_1 ? 'disable' : 'enable')
+      action: () => void handleSingleOperationRef.current(isEnabled_1 ? 'disable' : 'enable')
     });
 
     // Update/Uninstall options — not available for built-in plugins
@@ -1388,11 +1387,11 @@ export function ManagePlugins({
       }
       menuItems.push({
         label: 'Update now',
-        action: () => void handleSingleOperation('update')
+        action: () => void handleSingleOperationRef.current('update')
       });
       menuItems.push({
         label: 'Uninstall',
-        action: () => void handleSingleOperation('uninstall')
+        action: () => void handleSingleOperationRef.current('uninstall')
       });
     }
     if (selectedPlugin.plugin.manifest.homepage) {
@@ -1545,7 +1544,6 @@ export function ManagePlugins({
   // advertise; (2) unlike confirm-project-uninstall (which uses useKeybindings
   // where n and escape both map to confirm:no), here n and escape are DIFFERENT
   // actions (keep-data vs cancel), so this deliberately stays on raw useInput.
-  // eslint-disable-next-line custom-rules/prefer-use-keybindings -- raw y/n/esc; Enter must not trigger destructive delete
   useInput((input, key) => {
     if (!selectedPlugin) return;
     const pluginId_9 = `${selectedPlugin.plugin.name}@${selectedPlugin.marketplace}`;
@@ -1589,7 +1587,6 @@ export function ManagePlugins({
   }, [searchQuery]);
 
   // Handle input for entering search mode (text input handled by useSearchInput hook)
-  // eslint-disable-next-line custom-rules/prefer-use-keybindings -- useInput needed for raw search mode text input
   useInput((input_0, key_0) => {
     const keyIsNotCtrlOrMeta = !key_0.ctrl && !key_0.meta;
     if (isSearchMode) {
@@ -1660,7 +1657,7 @@ export function ManagePlugins({
   // Configure options (from the Manage menu)
   if (typeof viewState === 'object' && viewState.type === 'configuring-options' && selectedPlugin) {
     const pluginId_11 = `${selectedPlugin.plugin.name}@${selectedPlugin.marketplace}`;
-    return <PluginOptionsDialog title={`Configure ${selectedPlugin.plugin.name}`} subtitle="Plugin options" configSchema={viewState.schema} initialValues={loadPluginOptions(pluginId_11)} onSave={values => {
+    return <PluginOptionsDialog title={`Configure ${selectedPlugin.plugin.name}`} subtitle="Plugin options" configSchema={viewState.schema} initialValues={loadPluginOptions(pluginId_11)} onSave={(values: UserConfigValues) => {
       try {
         savePluginOptions(pluginId_11, values, viewState.schema);
         clearAllCaches();
@@ -1816,13 +1813,13 @@ export function ManagePlugins({
     const isEnabled_2 = mergedSettings_2?.enabledPlugins?.[pluginId_13] !== false;
 
     // Compute plugin errors section
-    const filteredPluginErrors = pluginErrors.filter(e_1 => 'plugin' in e_1 && e_1.plugin === selectedPlugin.plugin.name || e_1.source === pluginId_13 || e_1.source.startsWith(`${selectedPlugin.plugin.name}@`));
+    const filteredPluginErrors = pluginErrors.filter((e_1: PluginError) => 'plugin' in e_1 && e_1.plugin === selectedPlugin.plugin.name || e_1.source === pluginId_13 || e_1.source.startsWith(`${selectedPlugin.plugin.name}@`));
     const pluginErrorsSection = filteredPluginErrors.length === 0 ? null : <Box flexDirection="column" marginBottom={1}>
           <Text bold color="error">
             {filteredPluginErrors.length}{' '}
             {plural(filteredPluginErrors.length, 'error')}:
           </Text>
-          {filteredPluginErrors.map((error_3, i_0) => {
+          {filteredPluginErrors.map((error_3: PluginError, i_0: number) => {
         const guidance = getErrorGuidance(error_3);
         return <Box key={i_0} flexDirection="column" marginLeft={2}>
                 <Text color="error">{formatErrorMessage(error_3)}</Text>

@@ -93,19 +93,32 @@ export function clearSessionCaches(
 
   // Clear tungsten session usage tracking
   if (process.env.USER_TYPE === 'ant') {
-    void import('../../tools/TungstenTool/TungstenTool.js').then(
-      ({ clearSessionsWithTungstenUsage, resetInitializationState }) => {
-        clearSessionsWithTungstenUsage()
-        resetInitializationState()
-      },
-    )
+    try {
+      /* eslint-disable @typescript-eslint/no-require-imports */
+      const tungstenModule = require('../../tools/TungstenTool/TungstenTool.js') as {
+        clearSessionsWithTungstenUsage?: () => void
+        resetInitializationState?: () => void
+      }
+      /* eslint-enable @typescript-eslint/no-require-imports */
+      tungstenModule.clearSessionsWithTungstenUsage?.()
+      tungstenModule.resetInitializationState?.()
+    } catch {
+      // Tungsten tool is optional in this workspace snapshot.
+    }
   }
   // Clear attribution caches (file content cache, pending bash states)
   // Dynamic import to preserve dead code elimination for COMMIT_ATTRIBUTION feature flag
   if (feature('COMMIT_ATTRIBUTION')) {
-    void import('../../utils/attributionHooks.js').then(
-      ({ clearAttributionCaches }) => clearAttributionCaches(),
-    )
+    try {
+      /* eslint-disable @typescript-eslint/no-require-imports */
+      const attributionHooksModule = require('../../utils/attributionHooks.js') as {
+        clearAttributionCaches?: () => void
+      }
+      /* eslint-enable @typescript-eslint/no-require-imports */
+      attributionHooksModule.clearAttributionCaches?.()
+    } catch {
+      // Attribution hooks are optional in this workspace snapshot.
+    }
   }
   // Clear repository detection caches
   clearRepositoryCaches()
