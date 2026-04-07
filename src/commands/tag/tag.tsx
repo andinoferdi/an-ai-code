@@ -3,7 +3,6 @@ import chalk from 'chalk';
 import type { UUID } from 'crypto';
 import * as React from 'react';
 import { getSessionId } from '../../bootstrap/state.js';
-import type { CommandResultDisplay } from '../../commands.js';
 import { Select } from '../../components/CustomSelect/select.js';
 import { Dialog } from '../../components/design-system/Dialog.js';
 import { COMMON_HELP_ARGS, COMMON_INFO_ARGS } from '../../constants/xml.js';
@@ -12,7 +11,11 @@ import { logEvent } from '../../services/analytics/index.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { recursivelySanitizeUnicode } from '../../utils/sanitization.js';
 import { getCurrentSessionTag, getTranscriptPath, saveTag } from '../../utils/sessionStorage.js';
-function ConfirmRemoveTag(t0) {
+function ConfirmRemoveTag(t0: {
+  tagName: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
   const $ = _c(11);
   const {
     tagName,
@@ -29,7 +32,7 @@ function ConfirmRemoveTag(t0) {
   }
   let t3;
   if ($[1] !== onCancel || $[2] !== onConfirm) {
-    t3 = value => value === "yes" ? onConfirm() : onCancel();
+    t3 = (value: "yes" | "no") => value === "yes" ? onConfirm() : onCancel();
     $[1] = onCancel;
     $[2] = onConfirm;
     $[3] = t3;
@@ -69,14 +72,17 @@ function ConfirmRemoveTag(t0) {
   }
   return t6;
 }
-function ToggleTagAndClose(t0) {
+function ToggleTagAndClose(t0: {
+  tagName: string;
+  onDone: LocalJSXCommandOnDone;
+}) {
   const $ = _c(17);
   const {
     tagName,
     onDone
   } = t0;
   const [showConfirm, setShowConfirm] = React.useState(false);
-  const [sessionId, setSessionId] = React.useState(null);
+  const [sessionId, setSessionId] = React.useState<UUID | null>(null);
   let t1;
   if ($[0] !== tagName) {
     t1 = recursivelySanitizeUnicode(tagName).trim();
@@ -131,6 +137,7 @@ function ToggleTagAndClose(t0) {
     t2 = $[4];
     t3 = $[5];
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(t2, t3);
   if (showConfirm && sessionId) {
     let t4;
@@ -178,7 +185,9 @@ function ToggleTagAndClose(t0) {
   }
   return null;
 }
-function ShowHelp(t0) {
+function ShowHelp(t0: {
+  onDone: LocalJSXCommandOnDone;
+}) {
   const $ = _c(3);
   const {
     onDone
@@ -199,6 +208,7 @@ function ShowHelp(t0) {
     t1 = $[1];
     t2 = $[2];
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(t1, t2);
   return null;
 }

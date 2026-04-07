@@ -36,7 +36,11 @@ function resumeHelpMessage(result: ResumeResult): string {
       return `Found ${result.count} sessions matching ${chalk.bold(result.arg)}. Please use /resume to pick a specific session.`;
   }
 }
-function ResumeError(t0) {
+function ResumeError(t0: {
+  message: string;
+  args: string;
+  onDone: () => void;
+}) {
   const $ = _c(10);
   const {
     message,
@@ -58,6 +62,7 @@ function ResumeError(t0) {
     t1 = $[1];
     t2 = $[2];
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   React.useEffect(t1, t2);
   let t3;
   if ($[3] !== args) {
@@ -114,7 +119,7 @@ function ResumeCommand({
         return;
       }
       setLogs(resumable);
-    } catch (_err) {
+    } catch {
       onDone('Failed to load conversations');
     } finally {
       setLoading(false);

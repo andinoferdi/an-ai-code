@@ -1,1 +1,3 @@
-export default { isEnabled: () => false, isHidden: true, name: 'stub' };
+const shareCommand = { isEnabled: () => false, isHidden: true, name: 'stub' };
+
+export default shareCommand;

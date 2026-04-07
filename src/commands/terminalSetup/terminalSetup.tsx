@@ -119,7 +119,8 @@ export async function setupTerminal(theme: ThemeName): Promise<string> {
   maybeMarkProjectOnboardingComplete();
 
   // Install shell completions (ant-only, since the completion command is ant-only)
-  if ("external" === 'ant') {
+  const appVariant: string = "external";
+  if (appVariant === 'ant') {
     result += await setupShellCompletion(theme);
   }
   return result;
@@ -140,6 +141,7 @@ export function markBackslashReturnUsed(): void {
   }
 }
 export async function call(onDone: LocalJSXCommandOnDone, context: ToolUseContext & LocalJSXCommandContext, _args: string): Promise<null> {
+  void _args;
   if (env.terminal && env.terminal in NATIVE_CSIU_TERMINALS) {
     const message = `Shift+Enter is natively supported in ${NATIVE_CSIU_TERMINALS[env.terminal]}.
 

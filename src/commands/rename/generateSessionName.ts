@@ -3,7 +3,6 @@ import type { Message } from '../../types/message.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { errorMessage } from '../../utils/errors.js'
 import { safeParseJSON } from '../../utils/json.js'
-import { extractTextContent } from '../../utils/messages.js'
 import { extractConversationText } from '../../utils/sessionTitle.js'
 import { asSystemPrompt } from '../../utils/systemPromptType.js'
 
@@ -43,7 +42,21 @@ export async function generateSessionName(
       },
     })
 
-    const content = extractTextContent(result.message.content)
+    const content =
+      typeof result.message.content === 'string'
+        ? result.message.content
+        : result.message.content
+            .map(block =>
+              typeof block === 'object' &&
+              block !== null &&
+              'type' in block &&
+              block.type === 'text' &&
+              'text' in block &&
+              typeof block.text === 'string'
+                ? block.text
+                : '',
+            )
+            .join('')
 
     const response = safeParseJSON(content)
     if (

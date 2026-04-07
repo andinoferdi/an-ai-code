@@ -11,7 +11,7 @@ import { logForDebugging } from '../../utils/debug.js';
 type Props = {
   onDone: () => void;
 };
-function SessionInfo(t0) {
+function SessionInfo(t0: Props) {
   const $ = _c(19);
   const {
     onDone
@@ -43,6 +43,7 @@ function SessionInfo(t0) {
     t1 = $[1];
     t2 = $[2];
   }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(t1, t2);
   let t3;
   if ($[3] === Symbol.for("react.memo_cache_sentinel")) {
@@ -122,16 +123,18 @@ function SessionInfo(t0) {
   }
   return t9;
 }
-function _temp4(line_0, i) {
+function _temp4(line_0: string, i: number) {
   return <Text key={i}>{line_0}</Text>;
 }
-function _temp3(line) {
+function _temp3(line: string) {
   return line.length > 0;
 }
-function _temp2(e) {
-  logForDebugging("QR code generation failed", e);
+function _temp2(e: unknown) {
+  logForDebugging(`QR code generation failed: ${String(e)}`, {
+    level: "error"
+  });
 }
-function _temp(s) {
+function _temp(s: { remoteSessionUrl?: string }) {
   return s.remoteSessionUrl;
 }
 export const call: LocalJSXCommandCall = async onDone => {

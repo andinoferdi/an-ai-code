@@ -79,6 +79,7 @@ type Step = {
 } | {
   name: 'uploading';
 };
+type SetupAction = 'send' | 'cancel';
 function Web({
   onDone
 }: {
@@ -172,7 +173,7 @@ function Web({
     }, {
       label: 'Cancel',
       value: 'cancel'
-    }]} onChange={value => {
+    }]} onChange={(value: SetupAction) => {
       if (value === 'send') {
         void handleConfirm(token);
       } else {
