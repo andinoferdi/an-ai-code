@@ -116,7 +116,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
       <div
         className={cn(
-          "max-w-[78%] rounded-[1.45rem]",
+          "max-w-[84%] rounded-[1.45rem] xl:max-w-[86%]",
           isUser
             ? [
                 "rounded-tr-sm",

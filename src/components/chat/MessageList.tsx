@@ -22,7 +22,7 @@ export function MessageList({ messages }: MessageListProps) {
       className="w-full px-[calc(var(--chat-shell-gutter)*0.92)]"
     >
       <div
-        className="chat-column flex w-full flex-col gap-7"
+        className="chat-column flex flex-col gap-7"
         style={{
           paddingTop: "var(--chat-scroll-top-space)",
           paddingBottom: "var(--chat-scroll-bottom-space)",

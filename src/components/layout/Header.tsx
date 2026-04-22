@@ -14,7 +14,7 @@ export function Header({ onMenuClick }: HeaderProps) {
 
   return (
     <header className="flex h-12 w-full flex-none items-center bg-[var(--app-bg)]">
-      <div className="app-rail flex w-full items-center justify-between gap-3 px-3 sm:px-4">
+      <div className="app-rail flex items-center justify-between gap-3 px-3 sm:px-4">
         <div className="flex min-w-0 flex-1 items-center gap-1 sm:gap-2">
           <Button
             variant="ghost"

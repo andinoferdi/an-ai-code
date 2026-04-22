@@ -63,6 +63,7 @@ export function MessageInput({
 
   const canSend = value.trim().length > 0 && !isSending;
   const isCentered = layout === "centered";
+  const widthClass = isCentered ? "chat-column--hero" : "chat-column";
   const resolvedPlaceholder =
     placeholder ??
     (hasMessages ? "Reply..." : "Let's start by answering your question.");
@@ -78,7 +79,7 @@ export function MessageInput({
       )}
       style={{ background: isCentered ? "var(--app-bg)" : "var(--chat-bg)" }}
     >
-      <div className="chat-column--hero w-full">
+      <div className={cn(widthClass)}>
         <div
           className={cn(
             "flex cursor-text flex-col bg-[var(--input-bg)] transition-all duration-200",

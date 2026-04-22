@@ -45,9 +45,9 @@
   --scrollbar-thumb: #cfc8bc;
 
   /* layout rail */
-  --app-rail: 56rem;
-  --chat-column: 40rem;
-  --chat-hero-column: 48rem;
+  --app-rail: 64rem;
+  --chat-column: 46rem;
+  --chat-hero-column: 54rem;
   --chat-shell-gutter: clamp(1rem, 1.8vw, 1.5rem);
   --chat-scroll-top-space: clamp(1.5rem, 2.75vw, 2.5rem);
   --chat-scroll-bottom-space: clamp(1.5rem, 2.5vw, 2rem);
