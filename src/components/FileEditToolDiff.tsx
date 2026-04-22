@@ -20,7 +20,7 @@ type DiffData = {
   firstLine: string | null;
   fileContent: string | undefined;
 };
-export function FileEditToolDiff(props) {
+export function FileEditToolDiff(props: Props) {
   const $ = _c(7);
   let t0;
   if ($[0] !== props.edits || $[1] !== props.file_path) {
@@ -55,12 +55,15 @@ function DiffBody(t0) {
   const {
     promise,
     file_path
-  } = t0;
+  } = t0 as {
+    promise: Promise<DiffData>;
+    file_path: string;
+  };
   const {
     patch,
     firstLine,
     fileContent
-  } = use(promise);
+  } = use(promise) as DiffData;
   const {
     columns
   } = useTerminalSize();
@@ -83,7 +86,10 @@ function DiffFrame(t0) {
   const {
     children,
     placeholder
-  } = t0;
+  } = t0 as {
+    children?: React.ReactNode;
+    placeholder?: boolean;
+  };
   let t1;
   if ($[0] !== children || $[1] !== placeholder) {
     t1 = placeholder ? <Text dimColor={true}>…</Text> : children;

@@ -70,8 +70,7 @@ export function BridgeDialog(t0) {
       }
       qrToString(displayUrl, {
         type: "utf8",
-        errorCorrectionLevel: "L",
-        small: true
+        errorCorrectionLevel: "L"
       }).then(setQrText).catch(() => setQrText(""));
     };
     t5 = [showQR, displayUrl];

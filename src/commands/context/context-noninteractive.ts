@@ -157,7 +157,7 @@ function formatContextAsMarkdownTable(data: ContextData): string {
       const s = contextCollapse.getStats()
       const { health: h } = s
 
-      const parts = []
+      const parts: string[] = []
       if (s.collapsedSpans > 0) {
         parts.push(
           `${s.collapsedSpans} ${plural(s.collapsedSpans, 'span')} summarized (${s.collapsedMessages} messages)`,

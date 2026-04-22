@@ -24,6 +24,7 @@ export type {
 export * from './sdk/coreTypes.js'
 // Re-export runtime types (callbacks, interfaces with methods)
 export * from './sdk/runtimeTypes.js'
+export type HookEvent = (typeof import('./sdk/coreTypes.js').HOOK_EVENTS)[number]
 
 // Re-export settings types (generated from settings JSON schema)
 export type { Settings } from './sdk/settingsTypes.generated.js'

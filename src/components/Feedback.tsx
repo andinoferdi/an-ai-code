@@ -32,7 +32,10 @@ import TextInput from './TextInput.js';
 
 // This value was determined experimentally by testing the URL length limit
 const GITHUB_URL_LIMIT = 7250;
-const GITHUB_ISSUES_REPO_URL = "external" === 'ant' ? 'https://github.com/anthropics/claude-cli-internal/issues' : 'https://github.com/anthropics/claude-code/issues';
+const GITHUB_ISSUES_REPO_URL =
+  (process.env.USER_TYPE as string | undefined) === 'ant'
+    ? 'https://github.com/anthropics/claude-cli-internal/issues'
+    : 'https://github.com/anthropics/claude-code/issues';
 type Props = {
   abortSignal: AbortSignal;
   messages: Message[];
@@ -459,7 +462,15 @@ async function generateTitle(description: string, abortSignal: AbortSignal): Pro
         mcpTools: []
       }
     });
-    const title = response.message.content[0]?.type === 'text' ? response.message.content[0].text : 'Bug Report';
+    const firstContent =
+      Array.isArray(response.message.content) ? response.message.content[0] : null;
+    const title =
+      firstContent &&
+      typeof firstContent === 'object' &&
+      firstContent.type === 'text' &&
+      typeof firstContent.text === 'string'
+        ? firstContent.text
+        : 'Bug Report';
 
     // Check if the title contains an API error message
     if (startsWithApiErrorPrefix(title)) {

@@ -87,7 +87,7 @@ export function useMemorySurvey(messages: Message[], isLoading: boolean, hasActi
     });
   }, []);
   const shouldShowTranscriptPrompt = useCallback((selected_0: FeedbackSurveyResponse) => {
-    if ("external" !== 'ant') {
+    if ((process.env.USER_TYPE as string | undefined) !== 'ant') {
       return false;
     }
     if (selected_0 !== 'bad' && selected_0 !== 'good') {
@@ -184,7 +184,12 @@ export function useMemorySurvey(messages: Message[], isLoading: boolean, hasActi
     if (!lastAssistant || seenAssistantUuids.current.has(lastAssistant.uuid)) {
       return;
     }
-    const text = extractTextContent(lastAssistant.message.content, ' ');
+    const text = Array.isArray(lastAssistant.message.content)
+      ? extractTextContent(
+          lastAssistant.message.content as ReadonlyArray<{ type: string }>,
+          ' ',
+        )
+      : lastAssistant.message.content;
     if (!MEMORY_WORD_RE.test(text)) {
       return;
     }

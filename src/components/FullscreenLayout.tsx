@@ -216,8 +216,19 @@ export function countUnseenAssistantTurns(messages: readonly Message[], dividerI
 }
 function assistantHasVisibleText(m: Message): boolean {
   if (m.type !== 'assistant') return false;
+  if (!Array.isArray(m.message.content)) return false;
   for (const b of m.message.content) {
-    if (b.type === 'text' && b.text.trim() !== '') return true;
+    if (
+      typeof b === 'object' &&
+      b !== null &&
+      'type' in b &&
+      b.type === 'text' &&
+      'text' in b &&
+      typeof b.text === 'string' &&
+      b.text.trim() !== ''
+    ) {
+      return true;
+    }
   }
   return false;
 }
@@ -290,7 +301,7 @@ export function FullscreenLayout(t0) {
     rows: terminalRows,
     columns
   } = useTerminalSize();
-  const [stickyPrompt, setStickyPrompt] = useState(null);
+  const [stickyPrompt, setStickyPrompt] = useState<StickyPrompt | 'clicked' | null>(null);
   let t4;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t4 = {

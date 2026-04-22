@@ -10,7 +10,7 @@ type Props = {
     display?: CommandResultDisplay;
   }) => void;
 };
-function ThemePickerCommand(t0) {
+function ThemePickerCommand(t0: Props) {
   const $ = _c(8);
   const {
     onDone
@@ -18,7 +18,7 @@ function ThemePickerCommand(t0) {
   const [, setTheme] = useTheme();
   let t1;
   if ($[0] !== onDone || $[1] !== setTheme) {
-    t1 = setting => {
+    t1 = (setting: string) => {
       setTheme(setting);
       onDone(`Theme set to ${setting}`);
     };

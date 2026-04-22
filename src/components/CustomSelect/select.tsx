@@ -492,7 +492,10 @@ export function Select(t0) {
       if (hasDescriptions) {
         let t19;
         if ($[61] !== hideIndexes || $[62] !== maxIndexWidth_1) {
-          t19 = data => {
+          t19 = (data: {
+            option: { type?: string; label: ReactNode };
+            isSelected: boolean;
+          }): number => {
             if (data.option.type === "input") {
               return 0;
             }
@@ -507,7 +510,7 @@ export function Select(t0) {
         } else {
           t19 = $[63];
         }
-        const maxLabelWidth = Math.max(...optionData.map(t19));
+        const maxLabelWidth = Math.max(...(optionData.map(t19) as number[]));
         let t20;
         if ($[64] !== hideIndexes || $[65] !== maxIndexWidth_1 || $[66] !== maxLabelWidth) {
           t20 = data_0 => {

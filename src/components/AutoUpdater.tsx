@@ -49,7 +49,8 @@ export function AutoUpdater({
     if (isUpdatingRef.current) {
       return;
     }
-    if ("production" === 'test' || "production" === 'development') {
+    const runtimeEnv = process.env.NODE_ENV as string | undefined;
+    if (runtimeEnv === 'test' || runtimeEnv === 'development') {
       logForDebugging('AutoUpdater: Skipping update check in test/dev environment');
       return;
     }

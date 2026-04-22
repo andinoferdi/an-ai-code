@@ -85,7 +85,7 @@ const forceSnip = feature('HISTORY_SNIP')
   : null
 const workflowsCmd = feature('WORKFLOW_SCRIPTS')
   ? (
-      require('./commands/workflows/index.js') as typeof import('./commands/workflows/index.js')
+      require('./commands/workflows/index.js') as { default: Command }
     ).default
   : null
 const webCmd = feature('CCR_REMOTE_SETUP')
@@ -95,7 +95,9 @@ const webCmd = feature('CCR_REMOTE_SETUP')
   : null
 const clearSkillIndexCache = feature('EXPERIMENTAL_SKILL_SEARCH')
   ? (
-      require('./services/skillSearch/localSearch.js') as typeof import('./services/skillSearch/localSearch.js')
+      require('./services/skillSearch/localSearch.js') as {
+        clearSkillIndexCache: () => void
+      }
     ).clearSkillIndexCache
   : null
 const subscribePr = feature('KAIROS_GITHUB_WEBHOOKS')
@@ -107,17 +109,17 @@ const ultraplan = feature('ULTRAPLAN')
 const torch = feature('TORCH') ? require('./commands/torch.js').default : null
 const peersCmd = feature('UDS_INBOX')
   ? (
-      require('./commands/peers/index.js') as typeof import('./commands/peers/index.js')
+      require('./commands/peers/index.js') as { default: Command }
     ).default
   : null
 const forkCmd = feature('FORK_SUBAGENT')
   ? (
-      require('./commands/fork/index.js') as typeof import('./commands/fork/index.js')
+      require('./commands/fork/index.js') as { default: Command }
     ).default
   : null
 const buddy = feature('BUDDY')
   ? (
-      require('./commands/buddy/index.js') as typeof import('./commands/buddy/index.js')
+      require('./commands/buddy/index.js') as { default: Command }
     ).default
   : null
 /* eslint-enable @typescript-eslint/no-require-imports */
@@ -400,7 +402,9 @@ async function getSkills(cwd: string): Promise<{
 /* eslint-disable @typescript-eslint/no-require-imports */
 const getWorkflowCommands = feature('WORKFLOW_SCRIPTS')
   ? (
-      require('./tools/WorkflowTool/createWorkflowCommand.js') as typeof import('./tools/WorkflowTool/createWorkflowCommand.js')
+      require('./tools/WorkflowTool/createWorkflowCommand.js') as {
+        getWorkflowCommands: (cwd: string) => Promise<Command[]>
+      }
     ).getWorkflowCommands
   : null
 /* eslint-enable @typescript-eslint/no-require-imports */

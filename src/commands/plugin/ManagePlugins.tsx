@@ -235,7 +235,7 @@ function PluginComponentsDisplay({
         const pluginEntry = marketplaceData.plugins.find(p => p.name === plugin.name);
         if (pluginEntry) {
           // Combine commands from both sources
-          const commandPathList = [];
+          const commandPathList: string[] = [];
           if (plugin.commandsPath) {
             commandPathList.push(plugin.commandsPath);
           }
@@ -254,7 +254,7 @@ function PluginComponentsDisplay({
           }
 
           // Combine agents from both sources
-          const agentPathList = [];
+          const agentPathList: string[] = [];
           if (plugin.agentsPath) {
             agentPathList.push(plugin.agentsPath);
           }
@@ -273,7 +273,7 @@ function PluginComponentsDisplay({
           }
 
           // Combine skills from both sources
-          const skillPathList = [];
+          const skillPathList: string[] = [];
           if (plugin.skillsPath) {
             skillPathList.push(plugin.skillsPath);
           }
@@ -293,7 +293,7 @@ function PluginComponentsDisplay({
           }
 
           // Combine hooks from both sources
-          const hooksList = [];
+          const hooksList: unknown[] = [];
           if (plugin.hooksConfig) {
             hooksList.push(Object.keys(plugin.hooksConfig));
           }
@@ -302,7 +302,7 @@ function PluginComponentsDisplay({
           }
 
           // Combine MCP servers from both sources
-          const mcpServersList = [];
+          const mcpServersList: unknown[] = [];
           if (plugin.mcpServers) {
             mcpServersList.push(Object.keys(plugin.mcpServers));
           }

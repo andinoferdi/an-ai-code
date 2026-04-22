@@ -30,7 +30,6 @@ import type {
 const QR_OPTIONS = {
   type: 'utf8' as const,
   errorCorrectionLevel: 'L' as const,
-  small: true,
 }
 
 /** Generate a QR code and return its lines. */
