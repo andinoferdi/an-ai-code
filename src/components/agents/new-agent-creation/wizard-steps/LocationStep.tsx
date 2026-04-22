@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { Box } from '../../../../ink.js';
 import type { SettingSource } from '../../../../utils/settings/constants.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
@@ -8,14 +8,14 @@ import { Byline } from '../../../design-system/Byline.js';
 import { KeyboardShortcutHint } from '../../../design-system/KeyboardShortcutHint.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 export function LocationStep() {
   const $ = _c(11);
   const {
     goNext,
     updateWizardData,
     cancel
-  } = useWizard();
+  } = useWizard<AgentWizardData>();
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t0 = {
@@ -46,7 +46,7 @@ export function LocationStep() {
   }
   let t3;
   if ($[3] !== goNext || $[4] !== updateWizardData) {
-    t3 = value => {
+    t3 = (value: string) => {
       updateWizardData({
         location: value as SettingSource
       });

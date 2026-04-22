@@ -1,12 +1,12 @@
 import { c as _c } from "react/compiler-runtime";
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Byline } from '../../../design-system/Byline.js';
 import { KeyboardShortcutHint } from '../../../design-system/KeyboardShortcutHint.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
 import { ModelSelector } from '../../ModelSelector.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 export function ModelStep() {
   const $ = _c(8);
   const {
@@ -14,10 +14,10 @@ export function ModelStep() {
     goBack,
     updateWizardData,
     wizardData
-  } = useWizard();
+  } = useWizard<AgentWizardData>();
   let t0;
   if ($[0] !== goNext || $[1] !== updateWizardData) {
-    t0 = model => {
+    t0 = (model?: string) => {
       updateWizardData({
         selectedModel: model
       });

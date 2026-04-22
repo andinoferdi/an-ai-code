@@ -8,7 +8,7 @@ import { getActiveAgentsFromList } from '../../../../tools/AgentTool/loadAgentsD
 import { editFileInEditor } from '../../../../utils/promptEditor.js';
 import { useWizard } from '../../../wizard/index.js';
 import { getNewAgentFilePath, saveAgentToFile } from '../../agentFileUtils.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 import { ConfirmStep } from './ConfirmStep.js';
 type Props = {
   tools: Tools;

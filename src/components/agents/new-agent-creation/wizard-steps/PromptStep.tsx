@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import React, { type ReactNode, useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Text } from '../../../../ink.js';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import { editPromptInEditor } from '../../../../utils/promptEditor.js';
@@ -9,7 +9,7 @@ import { KeyboardShortcutHint } from '../../../design-system/KeyboardShortcutHin
 import TextInput from '../../../TextInput.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 export function PromptStep() {
   const $ = _c(20);
   const {
@@ -17,10 +17,10 @@ export function PromptStep() {
     goBack,
     updateWizardData,
     wizardData
-  } = useWizard();
+  } = useWizard<AgentWizardData>();
   const [systemPrompt, setSystemPrompt] = useState(wizardData.systemPrompt || "");
   const [cursorOffset, setCursorOffset] = useState(systemPrompt.length);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t0 = {

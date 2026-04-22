@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import type { Tools } from '../../../../Tool.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Byline } from '../../../design-system/Byline.js';
@@ -7,11 +7,11 @@ import { KeyboardShortcutHint } from '../../../design-system/KeyboardShortcutHin
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
 import { ToolSelector } from '../../ToolSelector.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 type Props = {
   tools: Tools;
 };
-export function ToolsStep(t0) {
+export function ToolsStep(t0: Props): React.ReactNode {
   const $ = _c(9);
   const {
     tools
@@ -21,10 +21,10 @@ export function ToolsStep(t0) {
     goBack,
     updateWizardData,
     wizardData
-  } = useWizard();
+  } = useWizard<AgentWizardData>();
   let t1;
   if ($[0] !== goNext || $[1] !== updateWizardData) {
-    t1 = selectedTools => {
+    t1 = (selectedTools: string[] | undefined) => {
       updateWizardData({
         selectedTools
       });

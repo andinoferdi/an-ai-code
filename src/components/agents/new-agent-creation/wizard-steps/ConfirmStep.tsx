@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import type { KeyboardEvent } from '../../../../ink/events/keyboard-event.js';
 import { Box, Text } from '../../../../ink.js';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
@@ -16,7 +16,7 @@ import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
 import { getNewRelativeAgentFilePath } from '../../agentFileUtils.js';
 import { validateAgent } from '../../validateAgent.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 type Props = {
   tools: Tools;
   existingAgents: AgentDefinition[];
@@ -24,7 +24,7 @@ type Props = {
   onSaveAndEdit: () => void;
   error?: string | null;
 };
-export function ConfirmStep(t0) {
+export function ConfirmStep(t0: Props): React.ReactNode {
   const $ = _c(88);
   const {
     tools,
@@ -36,7 +36,7 @@ export function ConfirmStep(t0) {
   const {
     goBack,
     wizardData
-  } = useWizard();
+  } = useWizard<AgentWizardData>();
   let t1;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t1 = {
@@ -49,7 +49,7 @@ export function ConfirmStep(t0) {
   useKeybinding("confirm:no", goBack, t1);
   let t2;
   if ($[1] !== onSave || $[2] !== onSaveAndEdit) {
-    t2 = e => {
+    t2 = (e: KeyboardEvent) => {
       if (e.key === "s" || e.key === "return") {
         e.preventDefault();
         onSave();
@@ -354,13 +354,13 @@ export function ConfirmStep(t0) {
   }
   return t25;
 }
-function _temp3(err, i_0) {
+function _temp3(err: string, i_0: number) {
   return <Text key={i_0} color="error">{" "}• {err}</Text>;
 }
-function _temp2(warning, i) {
+function _temp2(warning: string, i: number) {
   return <Text key={i} dimColor={true}>{" "}• {warning}</Text>;
 }
-function _temp(toolNames) {
+function _temp(toolNames: string[] | undefined) {
   if (toolNames === undefined) {
     return "All tools";
   }

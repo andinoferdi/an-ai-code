@@ -5,11 +5,10 @@ import { Box, Text } from '../../ink.js';
 type Props = {
   instructions?: string;
 };
-export function AgentNavigationFooter(t0) {
+export function AgentNavigationFooter({
+  instructions: t1
+}: Props): React.ReactNode {
   const $ = _c(2);
-  const {
-    instructions: t1
-  } = t0;
   const instructions = t1 === undefined ? "Press \u2191\u2193 to navigate \xB7 Enter to select \xB7 Esc to go back" : t1;
   const exitState = useExitOnCtrlCDWithKeybindings();
   const t2 = exitState.pending ? `Press ${exitState.keyName} again to exit` : instructions;

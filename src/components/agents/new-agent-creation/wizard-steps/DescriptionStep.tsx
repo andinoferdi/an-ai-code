@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import React, { type ReactNode, useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Text } from '../../../../ink.js';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import { editPromptInEditor } from '../../../../utils/promptEditor.js';
@@ -9,7 +9,7 @@ import { KeyboardShortcutHint } from '../../../design-system/KeyboardShortcutHin
 import TextInput from '../../../TextInput.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 export function DescriptionStep() {
   const $ = _c(18);
   const {
@@ -17,10 +17,10 @@ export function DescriptionStep() {
     goBack,
     updateWizardData,
     wizardData
-  } = useWizard();
+  } = useWizard<AgentWizardData>();
   const [whenToUse, setWhenToUse] = useState(wizardData.whenToUse || "");
   const [cursorOffset, setCursorOffset] = useState(whenToUse.length);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t0 = {
@@ -58,7 +58,7 @@ export function DescriptionStep() {
   useKeybinding("chat:externalEditor", handleExternalEditor, t2);
   let t3;
   if ($[4] !== goNext || $[5] !== updateWizardData) {
-    t3 = value => {
+    t3 = (value: string) => {
       const trimmedValue = value.trim();
       if (!trimmedValue) {
         setError("Description is required");

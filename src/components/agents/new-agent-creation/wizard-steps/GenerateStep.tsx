@@ -12,7 +12,7 @@ import TextInput from '../../../TextInput.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
 import { generateAgent } from '../../generateAgent.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 export function GenerateStep(): ReactNode {
   const {
     updateWizardData,

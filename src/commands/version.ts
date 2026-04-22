@@ -1,5 +1,12 @@
 import type { Command, LocalCommandCall } from '../types/command.js'
 
+declare const MACRO: {
+  VERSION: string
+  BUILD_TIME?: string
+  PACKAGE_URL?: string
+  NATIVE_PACKAGE_URL?: string
+}
+
 const call: LocalCommandCall = async () => {
   return {
     type: 'text',

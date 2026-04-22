@@ -1,6 +1,7 @@
 import { execFileSync } from 'child_process'
 import { diffLines } from 'diff'
 import { constants as fsConstants } from 'fs'
+import type { Dirent } from 'fs'
 import {
   copyFile,
   mkdir,
@@ -24,7 +25,7 @@ import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
 import { toError } from '../utils/errors.js'
 import { execFileNoThrow } from '../utils/execFileNoThrow.js'
 import { logError } from '../utils/log.js'
-import { extractTextContent } from '../utils/messages.js'
+import { getContentText } from '../utils/messages.js'
 import { getDefaultOpusModel } from '../utils/model/model.js'
 import {
   getProjectsDir,
@@ -56,7 +57,6 @@ type RemoteHostInfo = {
   sessionCount: number
 }
 
-/* eslint-disable custom-rules/no-process-env-top-level */
 const getRunningRemoteHosts: () => Promise<string[]> =
   process.env.USER_TYPE === 'ant'
     ? async () => {
@@ -120,9 +120,11 @@ const collectFromRemoteHost: (
           }
 
           const projectsDir = join(tempDir, 'projects')
-          let projectDirents: Awaited<ReturnType<typeof readdir>>
+          let projectDirents: Dirent[]
           try {
-            projectDirents = await readdir(projectsDir, { withFileTypes: true })
+            projectDirents = await readdir(projectsDir, {
+              withFileTypes: true,
+            })
           } catch {
             return result
           }
@@ -146,7 +148,7 @@ const collectFromRemoteHost: (
               }
 
               // Copy session files (skip existing)
-              let files: Awaited<ReturnType<typeof readdir>>
+              let files: Dirent[]
               try {
                 files = await readdir(projectPath, { withFileTypes: true })
               } catch {
@@ -219,7 +221,6 @@ const collectAllRemoteHostData: (destDir: string) => Promise<{
         return { hosts: result, totalCopied, totalSkipped }
       }
     : async () => ({ hosts: [], totalCopied: 0, totalSkipped: 0 })
-/* eslint-enable custom-rules/no-process-env-top-level */
 
 // ============================================================================
 // Types
@@ -895,7 +896,7 @@ async function summarizeTranscriptChunk(chunk: string): Promise<string> {
       },
     })
 
-    const text = extractTextContent(result.message.content)
+    const text = getContentText(result.message.content)
     return text || chunk.slice(0, 2000)
   } catch {
     // On error, just return truncated chunk
@@ -1038,7 +1039,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT matching this schema:
       },
     })
 
-    const text = extractTextContent(result.message.content)
+    const text = getContentText(result.message.content) || ''
 
     // Parse JSON from response
     const jsonMatch = text.match(/\{[\s\S]*\}/)
@@ -1589,7 +1590,7 @@ async function generateSectionInsight(
       },
     })
 
-    const text = extractTextContent(result.message.content)
+    const text = getContentText(result.message.content) || ''
 
     if (text) {
       // Parse JSON from response
@@ -2755,7 +2756,7 @@ type LiteSessionInfo = {
 async function scanAllSessions(): Promise<LiteSessionInfo[]> {
   const projectsDir = getProjectsDir()
 
-  let dirents: Awaited<ReturnType<typeof readdir>>
+  let dirents: Dirent[]
   try {
     dirents = await readdir(projectsDir, { withFileTypes: true })
   } catch {

@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import React, { type ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Text } from '../../../../ink.js';
 import { useKeybinding } from '../../../../keybindings/useKeybinding.js';
 import type { AgentDefinition } from '../../../../tools/AgentTool/loadAgentsDir.js';
@@ -10,20 +10,21 @@ import TextInput from '../../../TextInput.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
 import { validateAgentType } from '../../validateAgent.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 type Props = {
   existingAgents: AgentDefinition[];
 };
-export function TypeStep(_props) {
+export function TypeStep(_props: Props): React.ReactNode {
+  void _props;
   const $ = _c(15);
   const {
     goNext,
     goBack,
     updateWizardData,
     wizardData
-  } = useWizard();
+  } = useWizard<AgentWizardData>();
   const [agentType, setAgentType] = useState(wizardData.agentType || "");
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [cursorOffset, setCursorOffset] = useState(agentType.length);
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
@@ -37,7 +38,7 @@ export function TypeStep(_props) {
   useKeybinding("confirm:no", goBack, t0);
   let t1;
   if ($[1] !== goNext || $[2] !== updateWizardData) {
-    t1 = value => {
+    t1 = (value: string) => {
       const trimmedValue = value.trim();
       const validationError = validateAgentType(trimmedValue);
       if (validationError) {

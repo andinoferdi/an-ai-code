@@ -4,6 +4,7 @@ declare module 'bun:bundle' {
 
 declare const MACRO: {
   VERSION: string
+  BUILD_TIME?: string
   PACKAGE_URL?: string
   NATIVE_PACKAGE_URL?: string
 }

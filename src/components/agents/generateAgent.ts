@@ -9,6 +9,7 @@ import {
   normalizeMessagesForAPI,
 } from 'src/utils/messages.js'
 import type { ModelName } from 'src/utils/model/model.js'
+import type { MessageContentBlock } from 'src/types/message.js'
 import { isAutoMemoryEnabled } from '../../memdir/paths.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -164,10 +165,15 @@ export async function generateAgent(
     },
   })
 
-  const textBlocks = response.message.content.filter(
-    (block): block is ContentBlock & { type: 'text' } => block.type === 'text',
-  )
-  const responseText = textBlocks.map(block => block.text).join('\n')
+  const content = response.message.content
+  const responseText = Array.isArray(content)
+    ? (content as MessageContentBlock[])
+        .filter((block: MessageContentBlock): block is MessageContentBlock & { type: 'text'; text: string } => 'type' in block && block.type === 'text')
+        .map((block: MessageContentBlock & { type: 'text'; text: string }) => block.text)
+        .join('\n')
+    : typeof content === 'string'
+      ? content
+      : ''
 
   let parsed: GeneratedAgent
   try {

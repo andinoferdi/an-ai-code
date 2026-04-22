@@ -1,5 +1,5 @@
 import { c as _c } from "react/compiler-runtime";
-import React, { type ReactNode } from 'react';
+import React from 'react';
 import { Box } from '../../../../ink.js';
 import { ConfigurableShortcutHint } from '../../../ConfigurableShortcutHint.js';
 import { Select } from '../../../CustomSelect/select.js';
@@ -7,7 +7,7 @@ import { Byline } from '../../../design-system/Byline.js';
 import { KeyboardShortcutHint } from '../../../design-system/KeyboardShortcutHint.js';
 import { useWizard } from '../../../wizard/index.js';
 import { WizardDialogLayout } from '../../../wizard/WizardDialogLayout.js';
-import type { AgentWizardData } from '../types.js';
+import type { AgentWizardData } from '../types';
 export function MethodStep() {
   const $ = _c(11);
   const {
@@ -15,7 +15,7 @@ export function MethodStep() {
     goBack,
     updateWizardData,
     goToStep
-  } = useWizard();
+  } = useWizard<AgentWizardData>();
   let t0;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t0 = [{
@@ -39,7 +39,7 @@ export function MethodStep() {
   }
   let t2;
   if ($[2] !== goNext || $[3] !== goToStep || $[4] !== updateWizardData) {
-    t2 = value => {
+    t2 = (value: string) => {
       const method = value as 'generate' | 'manual';
       updateWizardData({
         method,
