@@ -1,7 +1,10 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+const COLLAPSED_USER_MESSAGE_HEIGHT = 224;
 
 interface MessageBubbleProps {
   message: Message;
@@ -92,6 +95,57 @@ export function MessageBubble({ message }: MessageBubbleProps) {
   const isTyping = message.isTyping;
 
   return (
+    <MessageBubbleInner
+      key={message.id}
+      message={message}
+      isUser={isUser}
+      isTyping={isTyping}
+    />
+  );
+}
+
+function MessageBubbleInner({
+  message,
+  isUser,
+  isTyping,
+}: MessageBubbleProps & {
+  isUser: boolean;
+  isTyping?: boolean;
+}) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [canCollapse, setCanCollapse] = useState(false);
+
+  useEffect(() => {
+    if (!isUser || isTyping) {
+      return;
+    }
+
+    const content = contentRef.current;
+    if (!content) return;
+
+    let frameId = 0;
+    const measureOverflow = () => {
+      frameId = window.requestAnimationFrame(() => {
+        setCanCollapse(
+          content.scrollHeight > COLLAPSED_USER_MESSAGE_HEIGHT + 8,
+        );
+      });
+    };
+
+    const observer = new ResizeObserver(measureOverflow);
+    observer.observe(content);
+    measureOverflow();
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+    };
+  }, [isTyping, isUser, message.content]);
+
+  const shouldCollapse = isUser && canCollapse && !isExpanded;
+
+  return (
     <div
       className={cn(
         "flex w-full gap-4",
@@ -134,7 +188,40 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           </div>
         ) : (
           <div className="px-5 py-4">
-            <MessageContent content={message.content} />
+            <div className="relative">
+              <div
+                ref={contentRef}
+                className={cn(
+                  "transition-[max-height] duration-200 ease-out",
+                  shouldCollapse && "max-h-56 overflow-hidden",
+                )}
+              >
+                <MessageContent content={message.content} />
+              </div>
+
+              {shouldCollapse && (
+                <div
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
+                  style={{
+                    background:
+                      "linear-gradient(to bottom, transparent, var(--user-bubble))",
+                  }}
+                />
+              )}
+            </div>
+
+            {isUser && canCollapse && (
+              <button
+                type="button"
+                aria-expanded={isExpanded}
+                onClick={() => setIsExpanded((expanded) => !expanded)}
+                className="mt-2 text-left text-[12px] font-medium text-[var(--text-muted)]
+                           transition-colors hover:text-[var(--text-secondary)]
+                           focus-visible:outline-none"
+              >
+                {isExpanded ? "Show less" : "Show more"}
+              </button>
+            )}
           </div>
         )}
       </div>

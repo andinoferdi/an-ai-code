@@ -1,15 +1,24 @@
 "use client";
 
 import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+} from "react";
+import {
   Blocks,
   Briefcase,
   Code2,
+  Pencil,
   MessageCircle,
   MoreHorizontal,
   PanelLeft,
   Plus,
   Search,
   SlidersHorizontal,
+  Trash2,
 } from "lucide-react";
 import { useChatContext } from "@/providers/ChatProvider";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -108,16 +117,88 @@ function ChatItem({
   title,
   isActive,
   onSelect,
+  onRename,
   onDelete,
 }: {
   id: string;
   title: string;
   isActive: boolean;
   onSelect: (id: string) => void;
+  onRename: (id: string, title: string) => void;
   onDelete: (id: string) => void;
 }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(title);
+  const menuRef = useRef<HTMLLIElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target;
+
+      if (target instanceof Node && menuRef.current?.contains(target)) {
+        return;
+      }
+
+      setMenuOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    setDraftTitle(title);
+  }, [title]);
+
+  useEffect(() => {
+    if (!isRenaming) return;
+
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, [isRenaming]);
+
+  function stopItemSelect(event: MouseEvent<HTMLElement>) {
+    event.stopPropagation();
+  }
+
+  function commitRename() {
+    const trimmedTitle = draftTitle.trim();
+
+    if (trimmedTitle && trimmedTitle !== title) {
+      onRename(id, trimmedTitle);
+    } else {
+      setDraftTitle(title);
+    }
+
+    setIsRenaming(false);
+  }
+
+  function cancelRename() {
+    setDraftTitle(title);
+    setIsRenaming(false);
+  }
+
+  function handleRenameKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      commitRename();
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      cancelRename();
+    }
+  }
+
   return (
-    <li className="group relative">
+    <li ref={menuRef} className="group relative">
       <button
         type="button"
         onClick={() => onSelect(id)}
@@ -129,30 +210,54 @@ function ChatItem({
             : "text-[var(--text-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]",
         )}
       >
-        <span
-          className={cn(
-            "block w-full truncate",
-            "group-hover:[mask-image:linear-gradient(to_right,black_78%,transparent_95%)]",
-            isActive &&
-              "[mask-image:linear-gradient(to_right,black_78%,transparent_95%)]",
-          )}
-        >
-          {title}
-        </span>
+        {!isRenaming && (
+          <span
+            className={cn(
+              "block w-full truncate",
+              "group-hover:[mask-image:linear-gradient(to_right,black_78%,transparent_95%)]",
+              isActive &&
+                "[mask-image:linear-gradient(to_right,black_78%,transparent_95%)]",
+            )}
+          >
+            {title}
+          </span>
+        )}
       </button>
+
+      {isRenaming && (
+        <input
+          ref={inputRef}
+          value={draftTitle}
+          aria-label={`Rename ${title}`}
+          data-testid="rename-chat-input"
+          onClick={stopItemSelect}
+          onMouseDown={stopItemSelect}
+          onChange={(event) => setDraftTitle(event.target.value)}
+          onBlur={commitRename}
+          onKeyDown={handleRenameKeyDown}
+          className="absolute inset-y-0 left-2 right-9 my-1 rounded-md border border-[var(--input-border-focus)]
+                     bg-[var(--input-bg)] px-2 text-[13px] text-[var(--text-primary)]
+                     shadow-[var(--input-shadow-focus)] focus:outline-none"
+        />
+      )}
 
       <div
         className={cn(
           "absolute right-1 top-1/2 -translate-y-1/2 transition-opacity duration-150",
-          isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+          isActive || menuOpen || isRenaming
+            ? "opacity-100"
+            : "opacity-0 group-hover:opacity-100",
         )}
       >
         <button
           type="button"
           aria-label={`Opsi untuk ${title}`}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          data-testid="chat-item-menu-trigger"
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(id);
+            setMenuOpen((open) => !open);
           }}
           className="flex h-6 w-6 items-center justify-center rounded-md
                      text-[var(--text-muted)] transition-colors
@@ -162,6 +267,55 @@ function ChatItem({
           <IconDots />
         </button>
       </div>
+
+      {menuOpen && (
+        <div
+          role="menu"
+          aria-label={`Menu ${title}`}
+          data-testid="chat-item-menu"
+          onClick={stopItemSelect}
+          onMouseDown={stopItemSelect}
+          className="absolute right-1 top-[calc(100%-0.25rem)] z-50 min-w-[10rem] rounded-xl border border-[var(--border)]
+                     bg-[var(--surface-raised)] p-1.5 text-[var(--text-secondary)]
+                     shadow-[var(--input-shadow-focus)]"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            data-testid="rename-chat-trigger"
+            onClick={(event) => {
+              event.stopPropagation();
+              setMenuOpen(false);
+              setIsRenaming(true);
+            }}
+            className="flex min-h-8 w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[13px]
+                       transition-colors hover:bg-[var(--surface-hover)] hover:text-[var(--text-primary)]
+                       focus-visible:outline-none"
+          >
+            <Pencil size={15} strokeWidth={1.9} />
+            <span className="flex-1 truncate">Rename</span>
+          </button>
+
+          <div className="my-1.5 h-px bg-[var(--border)]" />
+
+          <button
+            type="button"
+            role="menuitem"
+            data-testid="delete-chat-trigger"
+            onClick={(event) => {
+              event.stopPropagation();
+              setMenuOpen(false);
+              onDelete(id);
+            }}
+            className="flex min-h-8 w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-[13px]
+                       text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300
+                       focus-visible:outline-none"
+          >
+            <Trash2 size={15} strokeWidth={1.9} />
+            <span className="flex-1 truncate">Delete chat</span>
+          </button>
+        </div>
+      )}
     </li>
   );
 }
@@ -172,8 +326,14 @@ export function Sidebar({
   onClose,
   onDesktopClose,
 }: SidebarProps) {
-  const { chats, activeChatId, setActiveChatId, createNewChat, deleteChat } =
-    useChatContext();
+  const {
+    chats,
+    activeChatId,
+    setActiveChatId,
+    createNewChat,
+    renameChat,
+    deleteChat,
+  } = useChatContext();
 
   const userInitial = "AF";
   const userName = "Andino Ferdiansah";
@@ -282,6 +442,7 @@ export function Sidebar({
                           title={chat.title || "Percakapan baru"}
                           isActive={chat.id === activeChatId}
                           onSelect={handleSelectChat}
+                          onRename={renameChat}
                           onDelete={deleteChat}
                         />
                       ))}
