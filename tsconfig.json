@@ -5,7 +5,6 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "noImplicitAny": false,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
@@ -19,11 +18,8 @@
         "name": "next"
       }
     ],
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "src/*": ["./src/*"],
-      "src/*.js": ["./src/*.ts", "./src/*.tsx", "./src/*.js"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [

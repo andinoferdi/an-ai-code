@@ -1,74 +1,36 @@
-# Claude Code Source Leak via npm Sourcemap
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-This repository archives and documents a source leak of Claude Code that was exposed through a sourcemap file published to npm.
+## Getting Started
 
-## What happened
-On March 31, 2026, Chaofan Shou (@Fried_rice) reported that the published Claude Code package included a sourcemap containing original source files in `sourcesContent`.
-
-- Original post: https://x.com/Fried_rice/status/2038894956459290963
-
-[![Tweet about the leak](assets/x-post.png)](https://x.com/Fried_rice/status/2038894956459290963)
-
-## Why this is possible
-A sourcemap can include full source text. If `.map` files are shipped to npm without proper exclusion, original code can be reconstructed.
-
-Example:
-
-```json
-{
-  "version": 3,
-  "sources": ["../src/main.tsx", "../src/tools/BashTool.ts"],
-  "sourcesContent": ["/* original source */", "/* original source */"],
-  "mappings": "..."
-}
-```
-
-[![npm package showing exposed sources](assets/claude-npm-img.png)](assets/claude-npm-img.png)
-
-## What is in this repo
-This mirror is intended for technical analysis and documentation of the exposed codebase, including:
-
-- CLI architecture
-- Tooling and agent orchestration
-- Bridge/remote-control internals
-- Other internal modules that were not meant to be public
-
-Main structure:
-
-```text
-src/
-  main.tsx
-  QueryEngine.ts
-  Tool.ts
-  tools/
-  services/
-  coordinator/
-  bridge/
-  buddy/
-```
-
-## Run locally
-Requirements:
-
-- Bun or Node.js
-- npm
-
-Commands:
+First, run the development server:
 
 ```bash
-git clone https://github.com/andinoferdi/an-ai-code
-cd ai-code
-npm install
-npm run build
-node dist/main.js
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-## Disclaimer
-- This is not an official Anthropic repository.
-- I did not create the leak.
-- Original code ownership remains with Anthropic PBC.
-- Shared for research, educational, and archival purposes.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Credits
-- Discovery: Chaofan Shou (@Fried_rice)
-- Source post: https://x.com/Fried_rice/status/2038894956459290963
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
