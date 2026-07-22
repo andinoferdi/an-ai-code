@@ -80,3 +80,58 @@ export const FileTextIcon = (p: SVGProps<SVGSVGElement>) => (
     <path d="M213.66 82.34l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.34-5.66zM152 88V44l44 44zM96 136h64a8 8 0 0 1 0 16H96a8 8 0 0 1 0-16zm72 40a8 8 0 0 1-8 8H96a8 8 0 0 1 0-16h64a8 8 0 0 1 8 8z" />
   </svg>
 );
+
+/* Chat-menu and Share-dialog glyphs. Phosphor outlines at 256, matching the
+   weight of the icon font used elsewhere in the shell. */
+
+function Stroke({ d, ...props }: { d: string } & SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.6}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      width="16"
+      height="16"
+      aria-hidden
+      {...props}
+    >
+      <path d={d} />
+    </svg>
+  );
+}
+
+export const StarIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Stroke d="M12 3.5l2.6 5.28 5.83.85-4.22 4.11.996 5.8L12 16.81l-5.21 2.74.995-5.8L3.57 9.63l5.83-.85z" {...p} />
+);
+
+export const EyeOffIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Stroke d="M3 3l18 18M10.6 10.6a2 2 0 002.83 2.83M9.36 5.32A9.5 9.5 0 0112 5c5 0 9 4.5 9 7a11 11 0 01-2.6 3.4M6.2 6.7C3.9 8.2 3 10.3 3 12c0 2.5 4 7 9 7a9.4 9.4 0 003.9-.83" {...p} />
+);
+
+export const PencilIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Stroke d="M4 20h4L20.5 7.5a2.12 2.12 0 00-3-3L5 17v3zM14.5 5.5l4 4" {...p} />
+);
+
+export const TrashIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Stroke d="M4 6.5h16M9.5 6.5V4.8a1 1 0 011-1h3a1 1 0 011 1v1.7M6.5 6.5l.8 12.1a1.5 1.5 0 001.5 1.4h6.4a1.5 1.5 0 001.5-1.4l.8-12.1" {...p} />
+);
+
+export const LockIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Stroke d="M6.5 10.5V8a5.5 5.5 0 0111 0v2.5M5.5 10.5h13v9h-13z" {...p} />
+);
+
+export const BoxIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Stroke d="M3.5 7.5h17v11h-17zM3.5 7.5l1.6-3h13.8l1.6 3M12 7.5v11" {...p} />
+);
+
+export const SlidersIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Stroke d="M8 4v6M8 14v6M16 4v3M16 11v9M5.5 12h5M13.5 9h5" {...p} />
+);
+
+export const MicIcon = (p: SVGProps<SVGSVGElement>) => (
+  <Stroke d="M12 3.5a2.6 2.6 0 00-2.6 2.6v6a2.6 2.6 0 005.2 0v-6A2.6 2.6 0 0012 3.5zM5.5 11.5a6.5 6.5 0 0013 0M12 18v3" {...p} />
+);
