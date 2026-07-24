@@ -13,6 +13,7 @@ import {
   ThumbsUpIcon,
 } from "./chat-icons";
 import AttachmentCard from "./AttachmentCard";
+import Markdown from "./Markdown";
 import type {
   ActivityStep,
   Artifact,
@@ -122,11 +123,7 @@ function AssistantTurn({
       )}
 
       {/* Answer */}
-      {text && (
-        <div className="max-w-full whitespace-pre-wrap font-serif text-[16px] leading-[1.6] text-text-100">
-          {text}
-        </div>
-      )}
+      {text && <Markdown>{text}</Markdown>}
 
       {artifact && (
         <ArtifactCard

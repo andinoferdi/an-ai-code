@@ -29,6 +29,10 @@ export default function ChatPage() {
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
+  // Whether the view is stuck to the bottom. While true we follow new content;
+  // once the user scrolls up it flips false and we stop yanking them down.
+  const pinnedRef = useRef(true);
+  const prevLen = useRef(0);
 
   const chat = getChat(id);
 
@@ -47,11 +51,25 @@ export default function ChatPage() {
     if (hydrated && !chat) router.replace("/new");
   }, [hydrated, chat, router]);
 
-  // Keep the newest content in view as the response streams in.
+  // Follow streaming content only while pinned to the bottom (like claude.ai).
+  // A new turn (message count grows) re-pins and snaps down; a response
+  // streaming into the same message respects wherever the user scrolled to.
   useEffect(() => {
     const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (!el) return;
+    const len = chat?.messages.length ?? 0;
+    if (len > prevLen.current) pinnedRef.current = true;
+    prevLen.current = len;
+    if (pinnedRef.current) el.scrollTop = el.scrollHeight;
   }, [chat?.messages]);
+
+  // Track whether the user is at/near the bottom, so streaming doesn't fight
+  // a deliberate scroll up.
+  const onThreadScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  };
 
   if (!chat) return <div className="flex-1" />;
 
@@ -127,7 +145,11 @@ export default function ChatPage() {
         </header>
 
         {/* Thread */}
-        <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          ref={scrollRef}
+          onScroll={onThreadScroll}
+          className="min-h-0 flex-1 overflow-y-auto"
+        >
           <div className="mx-auto flex w-full max-w-[720px] flex-col items-center px-6 pt-4">
             <ChatThread
               messages={chat.messages}

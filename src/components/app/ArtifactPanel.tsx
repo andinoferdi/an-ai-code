@@ -17,7 +17,12 @@ export default function ArtifactPanel({
   artifact: Artifact;
   onClose: () => void;
 }) {
-  const [tab, setTab] = useState<"preview" | "code">("preview");
+  // Only HTML-ish artifacts can be meaningfully previewed in the iframe; for
+  // code (PHP, JS, …) the iframe just dumps the source, so default to Code.
+  const previewable = /<!doctype html>|<html[\s>]|<svg[\s>]/i.test(artifact.code);
+  const [tab, setTab] = useState<"preview" | "code">(
+    previewable ? "preview" : "code"
+  );
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
 

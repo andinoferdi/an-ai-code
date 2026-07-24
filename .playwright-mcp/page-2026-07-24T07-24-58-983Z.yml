@@ -1,0 +1,118 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - navigation [ref=f5e3]:
+      - generic [ref=f5e4]:
+        - link "Home" [ref=f5e5] [cursor=pointer]:
+          - /url: /new
+          - img "Claude" [ref=f5e6]
+        - generic [ref=f5e9]:
+          - button "Search" [ref=f5e10] [cursor=pointer]:
+            - generic [ref=f5e11]: 
+          - button "Close sidebar" [ref=f5e12] [cursor=pointer]:
+            - generic [ref=f5e13]: 
+      - generic [ref=f5e14]:
+        - link "New chat" [ref=f5e15] [cursor=pointer]:
+          - /url: /new
+          - generic [ref=f5e16]: 
+        - link "Chats" [ref=f5e20] [cursor=pointer]:
+          - /url: /recents
+          - generic [ref=f5e21]: 
+        - link "Projects" [ref=f5e24] [cursor=pointer]:
+          - /url: /projects
+          - generic [ref=f5e25]: 
+        - link "Artifacts" [ref=f5e28] [cursor=pointer]:
+          - /url: /artifacts
+          - generic [ref=f5e29]: 
+        - button "Customize" [ref=f5e32] [cursor=pointer]:
+          - generic [ref=f5e33]: 
+      - generic [ref=f5e36]:
+        - generic [ref=f5e37]:
+          - heading "Products" [level=2] [ref=f5e38]
+          - generic [ref=f5e39]: 
+        - link "Code" [ref=f5e40] [cursor=pointer]:
+          - /url: https://claude.com/product/claude-code
+          - generic [ref=f5e41]: 
+          - generic [ref=f5e44]: 
+        - link "Design" [ref=f5e45] [cursor=pointer]:
+          - /url: https://claude.ai/design
+          - generic [ref=f5e46]: 
+          - generic [ref=f5e49]: 
+          - generic [ref=f5e50]: 
+      - generic [ref=f5e51]:
+        - generic [ref=f5e53]:
+          - heading "Recents" [level=2] [ref=f5e54]
+          - generic [ref=f5e55]: 
+          - button "Group by" [ref=f5e56] [cursor=pointer]:
+            - generic [ref=f5e57]: 
+        - generic [ref=f5e118]:
+          - generic [ref=f5e119]:
+            - link "Explain how the internet" [ref=f5e120] [cursor=pointer]:
+              - /url: /chat/fce0cc78-6c61-4765-b11c-7c80b7e941ac
+            - button "More options for Explain how the internet" [ref=f5e122] [cursor=pointer]:
+              - generic [ref=f5e123]: 
+          - generic [ref=f5e124]:
+            - link "Create me a crud" [ref=f5e125] [cursor=pointer]:
+              - /url: /chat/90bfe86d-faa2-4ba0-8cf2-5192308efc6d
+            - button "More options for Create me a crud" [ref=f5e127] [cursor=pointer]:
+              - generic [ref=f5e128]: 
+      - generic [ref=f5e59]:
+        - button "user, Settings" [ref=f5e60] [cursor=pointer]:
+          - generic [ref=f5e61]: U
+          - generic [ref=f5e62]:
+            - generic [ref=f5e63]: user
+            - generic [ref=f5e64]: Pro plan
+        - button "Download apps" [ref=f5e65] [cursor=pointer]:
+          - generic [ref=f5e66]: 
+        - button "Account menu" [ref=f5e67] [cursor=pointer]
+    - generic [ref=f5e129]:
+      - banner [ref=f5e130]:
+        - button "Explain how the internet" [ref=f5e131] [cursor=pointer]
+        - generic [ref=f5e135]:
+          - button "Share" [ref=f5e136] [cursor=pointer]
+          - button "Use incognito" [ref=f5e137] [cursor=pointer]
+      - generic [ref=f5e145]:
+        - generic [ref=f5e146]:
+          - generic [ref=f5e147]: Explain how the internet works in at least 8 detailed paragraphs, covering packets, routing, DNS, TCP, HTTP, and TLS.
+          - generic [ref=f5e148]:
+            - button "Retry" [ref=f5e149] [cursor=pointer]
+            - button "Edit" [ref=f5e152] [cursor=pointer]
+            - button "Copy" [ref=f5e155] [cursor=pointer]
+        - generic [ref=f5e158]:
+          - button "Thought for 20s" [ref=f5e202] [cursor=pointer]
+          - generic [ref=f5e165]:
+            - paragraph [ref=f5e166]: The internet is a global network of interconnected computers that communicate using standardized protocols. At its core, data is broken down into small units called packets, which travel independently across the network. Each packet contains a payload (the actual data being transmitted) and headers with metadata like source and destination addresses. This packet-switched approach allows efficient use of network resources, as packets from different conversations can share the same pathways without interfering with each other.
+            - paragraph [ref=f5e167]: When you send data across the internet, it first gets segmented into packets at your device. Each packet is assigned a source IP address (your device's identifier) and a destination IP address (the target server). Routers—specialized computers that direct traffic—examine these IP addresses in the packet headers to determine the best path forward. This process, called routing, happens at the network layer and uses routing tables to make decisions based on current network conditions and topology.
+            - paragraph [ref=f5e168]: The Domain Name System (DNS) solves the problem of human-memorable names versus machine-readable IP addresses. When you type a URL like "example.com" into your browser, your device queries DNS servers to translate this name into an IP address like "93.184.216.34." DNS operates as a hierarchical distributed database, with root servers, top-level domain servers, and authoritative name servers working together to resolve queries efficiently. This translation happens in milliseconds, making it appear seamless to users.
+            - paragraph [ref=f5e203]: The Transmission Control Protocol (TCP) provides reliable, ordered delivery of data between applications. Before data transfer begins, TCP establishes a connection through a three-way handshake (SYN, SYN-ACK, ACK). During transmission, TCP ensures all packets arrive correctly by using sequence numbers, acknowledgments, and error checking. If packets are lost or corrupted, TCP retransmits them and may slow down transmission to maintain reliability. This reliability comes at the cost of some speed compared to the simpler User Datagram Protocol (UDP).
+            - paragraph [ref=f5e204]: When you visit a website, your browser uses the HTTP (Hypertext Transfer Protocol) to communicate with the web server. HTTP defines the format and meaning of requests (GET, POST, PUT, DELETE) and responses (200 OK, 404 Not Found, 500 Internal Server Error). Your browser sends an HTTP request asking for a specific resource (like an HTML page), and the server responds with the requested content along with metadata about the resource. HTTP/1.1 added persistent connections, while HTTP/2 introduced multiplexing to improve performance.
+            - paragraph [ref=f5e205]: Transport Layer Security (TLS) encrypts HTTP traffic to protect it from eavesdropping and tampering. When you visit a secure website (https://), your browser and the server perform a TLS handshake to establish a secure session. This involves exchanging cryptographic keys and certificates to verify authenticity. Once established, all HTTP data is encrypted using symmetric encryption, making it unreadable to anyone who intercepts the traffic. Modern TLS implementations use strong cipher suites and are regularly updated to address vulnerabilities.
+            - paragraph [ref=f5e206]: The complete journey of a web request involves multiple layers working together. When you enter a URL, your device first uses DNS to resolve the domain name to an IP address. Then TCP establishes a connection with the server, followed by a TLS handshake if using HTTPS. Your browser sends an HTTP request, the server processes it and sends back an HTTP response containing the web page. This response may include additional resources (images, scripts, stylesheets) that trigger new requests, all following the same process.
+            - paragraph [ref=f5e207]: The internet's resilience comes from its distributed architecture and redundancy. No single point of failure can bring down the entire network because data can be rerouted through alternative paths. Network providers interconnect through peering arrangements, and content delivery networks (CDNs) cache content closer to users. This combination of packet switching, intelligent routing, and layered protocols creates a robust system capable of handling billions of simultaneous connections while adapting to failures and congestion in real-time.
+          - generic [ref=f5e208]:
+            - button "Copy" [ref=f5e209] [cursor=pointer]
+            - button "Read aloud" [ref=f5e212] [cursor=pointer]
+            - button "Good response" [ref=f5e215] [cursor=pointer]
+            - button "Bad response" [ref=f5e218] [cursor=pointer]
+            - button "Retry" [ref=f5e221] [cursor=pointer]
+      - generic [ref=f5e170]:
+        - generic [ref=f5e173]:
+          - generic:
+            - paragraph: Drop files here to add to chat
+          - generic [ref=f5e174]:
+            - generic [ref=f5e175]:
+              - paragraph: Write a message…
+              - textbox "Write your prompt to Claude" [ref=f5e176]
+            - generic [ref=f5e177]:
+              - button "Add files, connectors, and more" [ref=f5e179] [cursor=pointer]:
+                - generic [ref=f5e180]: 
+              - generic [ref=f5e181]:
+                - 'button "Model: Poolside: Laguna S 2.1" [ref=f5e183] [cursor=pointer]':
+                  - generic [ref=f5e184]: "Poolside: Laguna S 2.1"
+                  - generic [ref=f5e185]: free
+                  - generic [ref=f5e186]: 
+                - button "Press and hold to record" [ref=f5e187] [cursor=pointer]:
+                  - generic [ref=f5e188]: 
+                - button "Use voice mode" [ref=f5e192] [cursor=pointer]
+        - paragraph [ref=f5e200]: Claude is AI and can make mistakes. Please double-check responses.
+  - button "Open Next.js Dev Tools" [ref=f5e114] [cursor=pointer]
+  - alert [ref=f5e201]

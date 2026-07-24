@@ -1,24 +1,19 @@
 "use client";
 
 /**
- * The scripted assistant. Same timings and copy as the original single-page
- * shell — this just drives the chat store instead of local component state.
+ * The chat run hook. Drives the chat store from a real streaming backend
+ * (POST /api/chat → OpenRouter, via the processing pipeline in
+ * src/lib/pipeline/*). The module's exports and this hook's return shape are
+ * unchanged from the original scripted version, so no page/composer/store code
+ * has to change — only the body of `send` now talks to the server instead of a
+ * timer cascade.
  */
 
-import { useCallback, useState } from "react";
-import { useChatStore, useTimers } from "@/lib/chat-store";
-import { ORBIT_ARTIFACT, THINKING_LABELS } from "@/components/app/demo-response";
-import type { Artifact, Attachment } from "@/types/chat";
-
-/** Reply the demo assistant gives for prompts that don't ask for code. */
-const PLAIN_REPLY =
-  "Hey! Looks like that might've been a typo — what can I help you with?";
-
-const CODE_REPLY =
-  'Made you a little generative art toy — a random "orbit generator" with wobbling planets on elliptical paths. Click Reroll for a new random system, or click the canvas to pause/resume.';
-
-const wantsCode = (text: string) =>
-  /\b(html|code|app|kode|buat|generate|component|css|js)\b/i.test(text);
+import { useCallback, useRef, useState } from "react";
+import { useChatStore } from "@/lib/chat-store";
+import { getSelectedModelId } from "@/lib/selected-model";
+import { THINKING_LABELS } from "@/components/app/demo-response";
+import type { Artifact, Attachment, Message } from "@/types/chat";
 
 /**
  * Short conversation title derived from the first prompt, like claude.ai.
@@ -51,30 +46,73 @@ export function takePendingPrompt(chatId: string) {
   return prompt;
 }
 
+/* ---- wire helpers (OpenAI-style messages for /api/chat) ---- */
+
+type TextPart = { type: "text"; text: string };
+type ImagePart = { type: "image_url"; image_url: { url: string } };
+type WireMessage = { role: "user" | "assistant"; content: string | (TextPart | ImagePart)[] };
+
+/** Inline text attachments into the prompt; pass images as vision parts. */
+function userContent(text: string, attachments: Attachment[]): string | (TextPart | ImagePart)[] {
+  const textPieces: string[] = [];
+  const images: ImagePart[] = [];
+
+  for (const a of attachments) {
+    if (a.kind === "pasted") textPieces.push(a.text);
+    else if (a.kind === "text") textPieces.push(`[Attached file: ${a.name}]\n${a.text}`);
+    else if (a.kind === "image" && a.dataUrl) images.push({ type: "image_url", image_url: { url: a.dataUrl } });
+  }
+
+  const combined = [text, ...textPieces].filter(Boolean).join("\n\n");
+  if (images.length === 0) return combined;
+  return [{ type: "text", text: combined || "(see image)" }, ...images];
+}
+
+/** Build the API history from stored messages, dropping the streaming placeholder. */
+function toWireMessages(messages: Message[]): WireMessage[] {
+  const wire: WireMessage[] = [];
+  for (const m of messages) {
+    if (m.role === "user") {
+      wire.push({ role: "user", content: userContent(m.text, m.attachments ?? []) });
+    } else if (!m.streaming && m.text.trim()) {
+      wire.push({ role: "assistant", content: m.text });
+    }
+  }
+  return wire;
+}
+
+type ServerEvent =
+  | { type: "meta"; model: string }
+  | { type: "reasoning"; text: string }
+  | { type: "token"; text: string }
+  | { type: "done"; model: string; text: string; thoughtSummary: string | null; artifact: Artifact | null }
+  | { type: "error"; error: string };
+
 export function useDemoRun(chatId: string) {
-  const { appendMessages, patchLastAssistant, renameChat, getChat } = useChatStore();
-  const { after, clear } = useTimers();
+  const { appendMessages, patchLastAssistant, renameChat, getChat, prefs } = useChatStore();
   const [generating, setGenerating] = useState(false);
   const [artifact, setArtifact] = useState<Artifact | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const stop = useCallback(() => {
-    clear();
+    abortRef.current?.abort();
+    abortRef.current = null;
     setGenerating(false);
     patchLastAssistant(chatId, { streaming: false });
-  }, [chatId, clear, patchLastAssistant]);
+  }, [chatId, patchLastAssistant]);
 
   const send = useCallback(
-    (text: string, attachments: Attachment[] = []) => {
-      clear();
-      const turnId = String(Date.now());
-      const code = wantsCode(text);
+    async (text: string, attachments: Attachment[] = []) => {
+      abortRef.current?.abort();
       const patch = (p: Parameters<typeof patchLastAssistant>[1]) =>
         patchLastAssistant(chatId, p);
 
       const chat = getChat(chatId);
-      if (!chat || chat.messages.length === 0)
+      const priorMessages = chat?.messages ?? [];
+      if (!chat || priorMessages.length === 0)
         renameChat(chatId, deriveTitle(text, attachments));
 
+      const turnId = String(Date.now());
       appendMessages(chatId, [
         {
           id: turnId + "-u",
@@ -94,53 +132,127 @@ export function useDemoRun(chatId: string) {
       ]);
       setGenerating(true);
 
-      // 1. Spinner caption swaps while Claude works.
-      after(1100, () =>
+      // Build history from the settled prior messages plus this turn's user
+      // message. We can't re-read getChat() here: the store is React state, so
+      // the messages just appended aren't visible synchronously in this closure.
+      const history: WireMessage[] = [
+        ...toWireMessages(priorMessages),
+        { role: "user", content: userContent(text, attachments) },
+      ];
+
+      const controller = new AbortController();
+      abortRef.current = controller;
+      const startedAt = Date.now();
+
+      let answer = "";
+      let reasoning = "";
+      let collapsed = false;
+
+      // Collapse the thinking step into a summary line once the answer begins,
+      // mirroring the original UI's thinking → summary → prose flow.
+      const collapseThinking = () => {
+        if (collapsed) return;
+        collapsed = true;
+        const summary = reasoning.replace(/\s+/g, " ").trim();
         patch({
-          steps: [
-            { kind: "thinking", label: code ? THINKING_LABELS[1] : THINKING_LABELS[0] },
-          ],
-        })
-      );
-
-      // 2. Skill-loaded row appears under the spinner (code prompts only).
-      if (code) {
-        after(1700, () =>
-          patch({
-            steps: [
-              { kind: "thinking", label: THINKING_LABELS[1] },
-              { kind: "skill", label: "Loaded frontend-design", name: "skill" },
-            ],
-          })
-        );
-      }
-
-      // 3. Activity rows collapse into a reasoning summary, then prose streams.
-      const replyAt = code ? 2900 : 1900;
-      const reply = code ? CODE_REPLY : PLAIN_REPLY;
-      const summary = code
-        ? "Devised interactive generative art with randomized shapes and gradients"
-        : "Thought for 1s";
-
-      after(replyAt, () => {
-        patch({ streaming: false, thoughtSummary: summary });
-
-        const words = reply.split(" ");
-        words.forEach((_, i) => {
-          after(replyAt + 22 * i, () => patch({ text: words.slice(0, i + 1).join(" ") }));
+          thoughtSummary: summary
+            ? summary.slice(0, 120) + (summary.length > 120 ? "…" : "")
+            : `Thought for ${Math.max(1, Math.round((Date.now() - startedAt) / 1000))}s`,
         });
+      };
 
-        const done = replyAt + 22 * words.length + 200;
-        if (code) {
-          after(done, () => {
-            patch({ artifact: ORBIT_ARTIFACT });
-            setArtifact(ORBIT_ARTIFACT);
+      const handle = (event: ServerEvent) => {
+        if (event.type === "reasoning") {
+          reasoning += event.text;
+          const i = Math.min(
+            THINKING_LABELS.length - 1,
+            Math.floor(reasoning.length / 80)
+          );
+          patch({ steps: [{ kind: "thinking", label: THINKING_LABELS[i] }] });
+        } else if (event.type === "token") {
+          collapseThinking();
+          answer += event.text;
+          patch({ text: answer });
+        } else if (event.type === "done") {
+          const finalSummary =
+            event.thoughtSummary ??
+            `Thought for ${Math.max(1, Math.round((Date.now() - startedAt) / 1000))}s`;
+          patch({
+            text: event.text,
+            thoughtSummary: finalSummary,
+            streaming: false,
+            artifact: event.artifact,
+          });
+          if (event.artifact) setArtifact(event.artifact);
+        } else if (event.type === "error") {
+          collapseThinking();
+          patch({
+            text: answer || `Sorry — ${event.error}`,
+            streaming: false,
           });
         }
-        after(done + 60, () => setGenerating(false));
-      });
+      };
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: history,
+            preferences: prefs,
+            model: getSelectedModelId(),
+          }),
+          signal: controller.signal,
+        });
+
+        if (!res.ok || !res.body) {
+          patch({ text: "Sorry — the assistant is unavailable right now.", streaming: false });
+          setGenerating(false);
+          return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          let boundary = buffer.indexOf("\n\n");
+          while (boundary !== -1) {
+            const record = buffer.slice(0, boundary);
+            buffer = buffer.slice(boundary + 2);
+            const data = record
+              .split("\n")
+              .filter((l) => l.startsWith("data:"))
+              .map((l) => l.slice(5).trim())
+              .join("");
+            if (data) {
+              try {
+                handle(JSON.parse(data) as ServerEvent);
+              } catch {
+                // ignore malformed frame
+              }
+            }
+            boundary = buffer.indexOf("\n\n");
+          }
+        }
+      } catch (err) {
+        if ((err as Error)?.name !== "AbortError") {
+          patch({
+            text: answer || "Sorry — something went wrong reaching the assistant.",
+            streaming: false,
+          });
+        }
+      } finally {
+        // Ensure the message is never left stuck in the streaming state.
+        patch({ streaming: false });
+        if (abortRef.current === controller) abortRef.current = null;
+        setGenerating(false);
+      }
     },
-    [chatId, after, clear, appendMessages, patchLastAssistant, renameChat, getChat]
+    [chatId, appendMessages, patchLastAssistant, renameChat, getChat, prefs]
   );
 
   return { send, stop, generating, artifact, setArtifact };
